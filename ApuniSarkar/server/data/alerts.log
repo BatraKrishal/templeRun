@@ -1,0 +1,80 @@
+[2026-11-10T06:05:47.019Z] [CRITICAL ALERT] ApuniSarkar ElevenLabs Key Quota Reached (Account 1)
+
+=====================================================
+UTTARAKHAND APUNI SARKAR - ELEVENLABS QUOTA ALERT
+=====================================================
+Timestamp: 2026-11-10T06:05:47.019Z
+Event: ElevenLabs API Key Quota Exhaustion / Rotation
+
+Exhausted Account:
+- Key ID: key_01 (Account 1)
+- Associated Email: uk.citizen.dev1@gmail.com
+- Characters Consumed: 9550 / 10000
+- Audio Playback Estimated: 14.8 mins
+- Status: EXHAUSTED
+
+Failover Status:
+- Next Active Key: key_02 (uk.citizen.dev2@gmail.com)
+- Characters Remaining: 10000
+
+Pool Health:
+- Active Healthy Accounts: 2 / 3
+
+Action Recommended:
+Please log in to ElevenLabs for account "uk.citizen.dev1@gmail.com" to verify quota or replace the key in ApuniSarkar/.env.
+=====================================================
+
+
+[2026-11-10T06:16:39.641Z] [CRITICAL ALERT] ApuniSarkar ElevenLabs Key Quota Reached (Account 2)
+
+=====================================================
+UTTARAKHAND APUNI SARKAR - ELEVENLABS QUOTA ALERT
+=====================================================
+Timestamp: 2026-11-10T06:16:39.641Z
+Event: ElevenLabs API Key Quota Exhaustion / Rotation
+
+Exhausted Account:
+- Key ID: key_02 (Account 2)
+- Associated Email: uk.citizen.dev2@gmail.com
+- Characters Consumed: 9550 / 10000
+- Audio Playback Estimated: 14.8 mins
+- Status: EXHAUSTED
+
+Failover Status:
+- Next Active Key: key_03 (uk.citizen.dev3@gmail.com)
+- Characters Remaining: 10000
+
+Pool Health:
+- Active Healthy Accounts: 1 / 3
+
+Action Recommended:
+Please log in to ElevenLabs for account "uk.citizen.dev2@gmail.com" to verify quota or replace the key in ApuniSarkar/.env.
+=====================================================
+
+
+[2026-11-10T06:39:35.652Z] [CRITICAL ALERT] ApuniSarkar ElevenLabs Key Quota Reached (Account 3)
+
+=====================================================
+UTTARAKHAND APUNI SARKAR - ELEVENLABS QUOTA ALERT
+=====================================================
+Timestamp: 2026-11-10T06:39:35.652Z
+Event: ElevenLabs API Key Quota Exhaustion / Rotation
+
+Exhausted Account:
+- Key ID: key_03 (Account 3)
+- Associated Email: uk.citizen.dev3@gmail.com
+- Characters Consumed: 9550 / 10000
+- Audio Playback Estimated: 14.8 mins
+- Status: EXHAUSTED
+
+Failover Status:
+- WARNING: NO HEALTHY KEYS REMAINING IN POOL! Falling back to Web Speech API.
+
+Pool Health:
+- Active Healthy Accounts: 0 / 3
+
+Action Recommended:
+Please log in to ElevenLabs for account "uk.citizen.dev3@gmail.com" to verify quota or replace the key in ApuniSarkar/.env.
+=====================================================
+
+

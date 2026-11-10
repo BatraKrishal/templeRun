@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF9933" />
+      <stop offset="50%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#138808" />
+    </linearGradient>
+    <pattern id="guilloche" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 20 Q10 0 20 20 T40 20" fill="none" stroke="#e2e8f0" stroke-width="0.75" />
+    </pattern>
+  </defs>
+
+  <!-- Card Background -->
+  <rect x="0" y="0" width="600" height="380" rx="16" fill="#FFFDF8" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="8" y="8" width="584" height="364" rx="12" fill="url(#guilloche)"/>
+
+  <!-- Watermark -->
+  <g transform="rotate(-25 300 190)" opacity="0.14">
+    <text x="300" y="160" font-family="sans-serif" font-size="28" font-weight="900" fill="#dc2626" text-anchor="middle">
+      PRAYAS 2026 DEMO FIXTURE
+    </text>
+    <text x="300" y="195" font-family="sans-serif" font-size="18" font-weight="700" fill="#dc2626" text-anchor="middle">
+      NOT A REAL IDENTITY DOCUMENT
+    </text>
+  </g>
+
+  <!-- Header Banner -->
+  <rect x="8" y="8" width="584" height="60" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <path d="M 12 66 L 588 66" stroke="url(#headerGrad)" stroke-width="4"/>
+  
+  <!-- Emblem Placeholder -->
+  <circle cx="48" cy="38" r="22" fill="#0F2942"/>
+  <text x="48" y="44" font-family="sans-serif" font-size="18" font-weight="bold" fill="#FF9933" text-anchor="middle">UK</text>
+  
+  <text x="80" y="32" font-family="'Noto Sans Devanagari', sans-serif" font-size="16" font-weight="700" fill="#1e293b">भारत सरकार | GOVERNMENT OF INDIA</text>
+  <text x="80" y="52" font-family="'Noto Sans Devanagari', sans-serif" font-size="13" font-weight="500" fill="#64748b">विशिष्ट पहचान प्राधिकरण (UIDAI) - उत्तराखण्ड परिदृश्य</text>
+
+  <!-- Photo Box -->
+  <rect x="36" y="90" width="120" height="150" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+  <!-- Avatar Silhouette -->
+  <circle cx="96" cy="140" r="32" fill="#94a3b8"/>
+  <path d="M56 225 C60 185 132 185 136 225 Z" fill="#94a3b8"/>
+  <rect x="36" y="246" width="120" height="20" rx="4" fill="#059669"/>
+  <text x="96" y="260" font-family="sans-serif" font-size="10" font-weight="bold" fill="#ffffff" text-anchor="middle">VERIFIED CITIZEN</text>
+
+  <!-- Details Block with Bounding Box Guides for OCR Visualizer -->
+  <!-- Name -->
+  <g id="box-name">
+    <text x="180" y="112" font-family="'Noto Sans Devanagari', sans-serif" font-size="16" font-weight="700" fill="#0f172a">कमला देवी / Kamla Devi</text>
+    <text x="180" y="128" font-family="sans-serif" font-size="10" font-weight="500" fill="#64748b">नाम / Full Name</text>
+  </g>
+
+  <!-- Guardian -->
+  <g id="box-guardian">
+    <text x="180" y="156" font-family="'Noto Sans Devanagari', sans-serif" font-size="14" font-weight="600" fill="#1e293b">पति: रमेश सिंह रावत (W/o Ramesh Singh Rawat)</text>
+    <text x="180" y="170" font-family="sans-serif" font-size="10" font-weight="500" fill="#64748b">पति या पिता / Guardian</text>
+  </g>
+
+  <!-- DOB & Gender -->
+  <g id="box-dob">
+    <text x="180" y="198" font-family="sans-serif" font-size="14" font-weight="600" fill="#1e293b">12/04/1988</text>
+    <text x="180" y="212" font-family="sans-serif" font-size="10" font-weight="500" fill="#64748b">जन्म तिथि / DOB</text>
+  </g>
+  <g id="box-gender">
+    <text x="310" y="198" font-family="'Noto Sans Devanagari', sans-serif" font-size="14" font-weight="600" fill="#1e293b">महिला / Female</text>
+    <text x="310" y="212" font-family="sans-serif" font-size="10" font-weight="500" fill="#64748b">लिंग / Gender</text>
+  </g>
+
+  <!-- Address / Location -->
+  <g id="box-address">
+    <text x="180" y="238" font-family="'Noto Sans Devanagari', sans-serif" font-size="13" font-weight="600" fill="#1e293b">ग्राम: गोपेश्वर (कर्णप्रयाग), जिला: चमोली, उत्तराखण्ड</text>
+    <text x="180" y="252" font-family="sans-serif" font-size="10" font-weight="500" fill="#64748b">पता / Address (Chamoli, Karnaprayag)</text>
+  </g>
+
+  <!-- QR Code Mock -->
+  <rect x="460" y="100" width="105" height="105" rx="6" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="470" y="110" width="25" height="25" fill="#0f172a"/>
+  <rect x="530" y="110" width="25" height="25" fill="#0f172a"/>
+  <rect x="470" y="170" width="25" height="25" fill="#0f172a"/>
+  <rect x="505" y="140" width="15" height="15" fill="#0f172a"/>
+  <rect x="525" y="165" width="20" height="20" fill="#0f172a"/>
+
+  <!-- Aadhaar Number Band -->
+  <rect x="20" y="285" width="560" height="65" rx="8" fill="#F1F5F9" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="300" y="325" font-family="'Courier New', Courier, monospace" font-size="28" font-weight="900" fill="#0F2942" text-anchor="middle" letter-spacing="4">
+    XXXX  XXXX  4829
+  </text>
+  <text x="300" y="344" font-family="'Noto Sans Devanagari', sans-serif" font-size="11" font-weight="600" fill="#059669" text-anchor="middle">
+    मेरा आधार, मेरी पहचान (आधार नंबर केवल अंतिम 4 अंक प्रदर्शित)
+  </text>
+</svg>
+

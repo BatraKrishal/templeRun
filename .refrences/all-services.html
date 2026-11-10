@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>e-Services Apuni Sarkar</title>
+
+    <!-- UX4G accessibility widget: inline CSS must load before React/JS bundle
+         so vendor-injected UI is hidden on first paint (avoids reload flash). -->
+    <style>
+      /* Hide all vendor UI while the widget initializes. this is then later removed by useAccessibilityWidgetInit. */
+      html.accessibility-widget-loading #uw-main,
+      html.accessibility-widget-loading #accessibility-overlay,
+      html.accessibility-widget-loading #open-the-accessibility-menu,
+      html.accessibility-widget-loading [id^='uw-'],
+      html.accessibility-widget-loading .uwaw {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* We use a custom navbar button — keep the vendor trigger/overlay hidden always. */
+      #uw-widget-custom-trigger,
+      #accessibility-overlay,
+      #open-the-accessibility-menu {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+    </style>
+    <!-- Added loading class before any script runs; pairs with the style block above. -->
+    <script>
+      document.documentElement.classList.add('accessibility-widget-loading')
+    </script>
+    <script type="module" crossorigin src="/assets/index-D5zAazib.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/jsx-runtime-9YgKe2Eq.js">
+    <link rel="modulepreload" crossorigin href="/assets/preload-helper-v911oC7T.js">
+    <link rel="modulepreload" crossorigin href="/assets/schemas-lAct9vbk.js">
+    <link rel="modulepreload" crossorigin href="/assets/utils-CA7Gka6f.js">
+    <link rel="modulepreload" crossorigin href="/assets/spinner-wpsvLciE.js">
+    <link rel="modulepreload" crossorigin href="/assets/match-sorter.esm-CXNdKdYH.js">
+    <link rel="modulepreload" crossorigin href="/assets/search-DpfAok7e.js">
+    <link rel="modulepreload" crossorigin href="/assets/shim-DqwIxHMB.js">
+    <link rel="modulepreload" crossorigin href="/assets/useStore-DhOpog_P.js">
+    <link rel="modulepreload" crossorigin href="/assets/react-dom-_dgpmj5P.js">
+    <link rel="modulepreload" crossorigin href="/assets/link-CAd5BRhP.js">
+    <link rel="modulepreload" crossorigin href="/assets/matchContext-1fchTJtT.js">
+    <link rel="modulepreload" crossorigin href="/assets/useNavigate-B8ACm-Eo.js">
+    <link rel="modulepreload" crossorigin href="/assets/lazyRouteComponent-jYYZD__G.js">
+    <link rel="modulepreload" crossorigin href="/assets/all-services-3Pr-IFwe.js">
+    <link rel="modulepreload" crossorigin href="/assets/use-accessibility-widget-rN82Tlm5.js">
+    <link rel="modulepreload" crossorigin href="/assets/config-CUQ9lQfH.js">
+    <link rel="modulepreload" crossorigin href="/assets/client-eFZdksir.js">
+    <link rel="modulepreload" crossorigin href="/assets/queries-CRCTMrwa.js">
+    <link rel="modulepreload" crossorigin href="/assets/_tab-Izv3B1S5.js">
+    <link rel="modulepreload" crossorigin href="/assets/reset-password-BVTs75-C.js">
+    <link rel="modulepreload" crossorigin href="/assets/useTranslation-BGfZSnm2.js">
+    <link rel="modulepreload" crossorigin href="/assets/janparichay-BauJw25t.js">
+    <link rel="modulepreload" crossorigin href="/assets/Match-C-_VO1FX.js">
+    <link rel="modulepreload" crossorigin href="/assets/createLucideIcon-BqLnDpte.js">
+    <link rel="modulepreload" crossorigin href="/assets/circle-check-DkBOZDYS.js">
+    <link rel="modulepreload" crossorigin href="/assets/info-DhxSqRzU.js">
+    <link rel="modulepreload" crossorigin href="/assets/triangle-alert-DhQG35Sa.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-BjNrGKIH.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Load with the document (not from React) so the widget is ready before the app mounts. -->
+    <script
+      defer
+      src="https://cdn.ux4g.gov.in/tools/accessibility-widget.js"
+    ></script>
+  </body>
+</html>

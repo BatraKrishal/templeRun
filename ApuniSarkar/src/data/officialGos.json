@@ -1,0 +1,74 @@
+[
+  {
+    "sNo": "1",
+    "goNumber": "307/XXXVI(3)/2011/55(1)/2011",
+    "goDate": "04/10/2011",
+    "department": "RTS Uttarakhand",
+    "subject": "The Uttarakhand Right To Service Act,2011",
+    "pdfUrl": "/docs/rts-act.pdf"
+  },
+  {
+    "sNo": "2",
+    "goNumber": "307/XXXVI(3)/2014/06(1)/2014",
+    "goDate": "27/01/2014",
+    "department": "RTS Uttarakhand",
+    "subject": "The Uttarakhand Right To Service Act, 2014",
+    "pdfUrl": "/docs/rts-amendment.pdf"
+  },
+  {
+    "sNo": "3",
+    "goNumber": "02/ XXX(6) /20-01(08)/2018",
+    "goDate": "24/05/2026",
+    "department": "ITDA, Uttarkahnd",
+    "subject": "CM Helpline Go, Uttarakhand",
+    "pdfUrl": "/docs/cm-helpline-go.pdf"
+  },
+  {
+    "sNo": "4",
+    "goNumber": "3909/6-8/2022-23-23",
+    "goDate": "27/08/2023",
+    "department": "Revenue Department",
+    "subject": "Shilpkar Cast Certificate Go",
+    "pdfUrl": "/docs/shilpkar-caste-certificate-go.pdf"
+  },
+  {
+    "sNo": "5",
+    "goNumber": "N/A",
+    "goDate": "24/05/2026",
+    "department": "Planning Department",
+    "subject": "Meri Yojna 2023",
+    "pdfUrl": "/docs/meri-yojna-2023.pdf"
+  },
+  {
+    "sNo": "6",
+    "goNumber": "588/XV-I/25/62949",
+    "goDate": "09/06/2025",
+    "department": "Animal Hubandry Department",
+    "subject": "Poltury Policy 2025",
+    "pdfUrl": "/docs/poultry-policy-2025.pdf"
+  },
+  {
+    "sNo": "7",
+    "goNumber": "1631/XV-I/22-1(15)2022",
+    "goDate": "15/11/2022",
+    "department": "Animal Hubandry Department",
+    "subject": "Broiler Farm Yojna",
+    "pdfUrl": "/docs/broiler-farm-yojna.pdf"
+  },
+  {
+    "sNo": "8",
+    "goNumber": "29/ XV-I /2022/(15)2022",
+    "goDate": "06/01/2023",
+    "department": "Animal Hubandry Department",
+    "subject": "Poultry Valley Yojna",
+    "pdfUrl": "/docs/poultry-valley-go.pdf"
+  },
+  {
+    "sNo": "9",
+    "goNumber": "647/ XV-I /23-1(3)2015",
+    "goDate": "18/04/2023",
+    "department": "Animal Hubandry Department",
+    "subject": "Goat Valley Yojna",
+    "pdfUrl": "/docs/goat-valley-go.pdf"
+  }
+]

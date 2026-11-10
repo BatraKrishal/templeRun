@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #8c431d !important;
+  --ring: #8c431d !important;
+  --navbar: #0e3d6e !important;
+  --content-max-width: 1600px;
+  --content-padding-x: 1.5rem;
+}
+
+.text-primary {
+  color: #8c431d !important;
+}
+
+.bg-primary {
+  background-color: #8c431d !important;
+}
+
+.hover\:bg-primary\/90:hover {
+  background-color: #733414 !important;
+}
+
+.border-primary {
+  border-color: #8c431d !important;
+}
+
+.ring-primary\/20 {
+  --tw-ring-color: rgba(140, 67, 29, 0.2) !important;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Devanagari', sans-serif;
+  }
+
+  /* Text Scaling Modes */
+  html.text-scale-sm {
+    font-size: 14px;
+  }
+  html.text-scale-base {
+    font-size: 16px;
+  }
+  html.text-scale-lg {
+    font-size: 18.5px;
+  }
+
+  /* High Contrast Mode */
+  html.high-contrast {
+    filter: contrast(125%);
+  }
+
+  html.high-contrast body {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  html.high-contrast .bg-white {
+    background-color: #121212 !important;
+    color: #ffffff !important;
+    border-color: #fbbf24 !important;
+  }
+
+  html.high-contrast .text-ink-900,
+  html.high-contrast .text-ink-700 {
+    color: #ffffff !important;
+  }
+}
+
+.content-container {
+  width: 100%;
+  max-width: min(100%, 1600px);
+  padding-inline: 1.5rem;
+  margin-inline: auto;
+}
+
+.hero-image-mask {
+  -webkit-mask-image: linear-gradient(90deg, #0000 0%, #000 45%), linear-gradient(#0000 0%, #000 15% 62%, #0000 80%);
+  mask-image: linear-gradient(90deg, #0000 0%, #000 45%), linear-gradient(#0000 0%, #000 15% 62%, #0000 80%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+/* React Fast Marquee Styles */
+.rfm-marquee-container {
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  width: 100%;
+}
+.rfm-marquee {
+  flex: 0 0 auto;
+  min-width: 100%;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  animation: rfm-scroll 45s linear infinite;
+}
+.rfm-marquee:hover {
+  animation-play-state: paused;
+}
+@keyframes rfm-scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="14" fill="#0F2942"/>
+  <!-- Mountain Peaks -->
+  <path d="M12 44L24 24L34 38L42 28L52 44H12Z" fill="#1B3B5F" opacity="0.6"/>
+  <path d="M22 44L30 30L38 44H22Z" fill="#2A527F"/>
+  <!-- Voice Wave / Bridge -->
+  <path d="M14 44C22 36 42 36 50 44" stroke="#FF6B00" stroke-width="3" stroke-linecap="round"/>
+  <!-- Central Mic -->
+  <rect x="28" y="16" width="8" height="15" rx="4" fill="#059669"/>
+  <path d="M24 24C24 29 27 33 32 33C37 33 40 29 40 24" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="32" y1="33" x2="32" y2="39" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="27" y1="39" x2="37" y2="39" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+
