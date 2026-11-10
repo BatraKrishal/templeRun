@@ -1,0 +1,425 @@
+[
+  {
+    "id": "srv-1",
+    "title": "Birth Registration /Certificate (Urban) within one years",
+    "department": "Urban Development Directorate",
+    "description": "Birth/Death Certificate (Urban). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/urban-development-directorate/birth-certificate-within-one-year.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-2",
+    "title": "Copy of Pariwar Register",
+    "department": "Panchayati Raj Department",
+    "description": "Panchayti Related Services. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/copy-family-register.png",
+    "route": "/services/panchayati-raj/pariwar-register",
+    "category": "Service"
+  },
+  {
+    "id": "srv-3",
+    "title": "Problem in Grid ( 33kv / 66kv )substation",
+    "department": "Department of Energy",
+    "description": "Power Supply Failure. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/upcl-department/problem-in-grid-substation.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-4",
+    "title": "Tap of Transformer",
+    "department": "Department of Energy",
+    "description": "Voltage Fluctuation. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/upcl-department/tap-of-transformer.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-5",
+    "title": "Ex-Servicemen Renewal in Employment Registration",
+    "department": "Soldier Welfare Department",
+    "description": "सेवायोजन संबंधित सेवाएँ. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/soldier-welfare-department/ex-servicemen-employment-registration-renewal.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-6",
+    "title": "Renewal of Class E (Existing)",
+    "department": "Minor Irrigation Department",
+    "description": "ठेकेदारों के पंजीकरण का नवीनीकरण (मौजूदा). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/minor-irrigation-department/renewal-in-category-e-existing.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-7",
+    "title": "Missing Person",
+    "department": "Home Department",
+    "description": "CCTNS की सेवाएं. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/home-department/missing-person.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-8",
+    "title": "Death Registration /Certificate (Urban) After one years",
+    "department": "Urban Development Directorate",
+    "description": "Birth/Death Certificate (Urban). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/urban-development-directorate/death-certificate-after-one-year.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-9",
+    "title": "Death Registration /Certificate (Urban) within 21 days",
+    "department": "Urban Development Directorate",
+    "description": "Birth/Death Certificate (Urban). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/urban-development-directorate/death-certificate-within-twenty-one-days.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-10",
+    "title": "Failure of Power Transformer",
+    "department": "Department of Energy",
+    "description": "Power Supply Failure. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/upcl-department/failure-of-power-transformer.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-11",
+    "title": "Approval of sewer connection in houses/commercial establishments",
+    "department": "Water Department",
+    "description": "New Sewer Connection. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/water-department/sewer-connection-houses-commercial.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-12",
+    "title": "Covid 19 Death Compensation",
+    "department": "Uttarakhand State Disaster Management Department",
+    "description": "Covid 19. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/uttarakhand-state-disaster-management-department/covid19-death-compensation.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-13",
+    "title": "Hill Area Certificate",
+    "department": "Revenue Department",
+    "description": "Revenue Certificates. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/revenue-department/hill-area-certificate.png",
+    "route": "/services/revenue/hill-area-certificate",
+    "category": "Service"
+  },
+  {
+    "id": "srv-14",
+    "title": "Toilet Certificate",
+    "department": "Panchayati Raj Department",
+    "description": "Panchayti Related Services. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/toilet-certificate.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-15",
+    "title": "Birth Registration /Certificate (Rural) After one month & Within one year",
+    "department": "Panchayati Raj Department",
+    "description": "Birth/Death Certificate (Rural). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/birth-certificate-one-month-to-one-year.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-16",
+    "title": "Reconnection On-Demand",
+    "department": "Department of Energy",
+    "description": "Disconnection/Reconnection of Supply. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/upcl-department/reconnection-on-demand.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-17",
+    "title": "32mm Diameter Water Connection",
+    "department": "Water Department",
+    "description": "New Water Connection. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/water-department/water-connection-32-mm.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-18",
+    "title": "Old Age Pension",
+    "department": "Social Welfare Department",
+    "description": "Pension (Rural / Urban). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/social-welfare-development/old-age-pension.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-19",
+    "title": "Registration in Class D",
+    "department": "Minor Irrigation Department",
+    "description": "Registration of Contractors. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/minor-irrigation-department/class-d-registration.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-20",
+    "title": "Renewal of Class D (Non-Existing)",
+    "department": "Minor Irrigation Department",
+    "description": "Renewal of Contractors' Registration (Non-Existing). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/minor-irrigation-department/renewal-in-category-d-non-existing.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-21",
+    "title": "Birth Registration /Certificate (Urban) within 21 days",
+    "department": "Urban Development Directorate",
+    "description": "Birth/Death Certificate (Urban). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/urban-development-directorate/birth-certificate-within-twenty-one-days.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-22",
+    "title": "Farmer Pension",
+    "department": "Social Welfare Department",
+    "description": "Pension (Rural / Urban). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/social-welfare-development/farmer-pension.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-23",
+    "title": "Abandonment Pension",
+    "department": "Social Welfare Department",
+    "description": "Pension (Rural / Urban). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/social-welfare-development/abandonment-pension.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-24",
+    "title": "Ex-Servicemen Employment Registration",
+    "department": "Soldier Welfare Department",
+    "description": "सेवायोजन संबंधित सेवाएँ. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/soldier-welfare-department/ex-servicemen-employment-registration.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-25",
+    "title": "Birth Registration /Certificate (Rural) After one years",
+    "department": "Panchayati Raj Department",
+    "description": "Birth/Death Certificate (Rural). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/birth-certificate-after-one-year.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-26",
+    "title": "Registration under Uttarakhand Dookan Aur Vanijya Adhishthan Adhiniyam,1962",
+    "department": "Labour Department",
+    "description": "Labour Services. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/labour-department/registration-shop-commercial-1962.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-27",
+    "title": "Birth Registration /Certificate (Urban) within 30 days",
+    "department": "Urban Development Directorate",
+    "description": "Birth/Death Certificate (Urban). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/urban-development-directorate/birth-certificate-within-thirty-days.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-28",
+    "title": "Add new Family",
+    "department": "Panchayati Raj Department",
+    "description": "Panchayti Related Services. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/add-a-family.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-29",
+    "title": "Seperation of family",
+    "department": "Panchayati Raj Department",
+    "description": "Panchayti Related Services. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/separation-of-family.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-30",
+    "title": "Fisheries Card",
+    "department": "Fisheries Department",
+    "description": "Fisheries Services. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/fisheries-department/fisheries-card.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-31",
+    "title": "Distribution Transformer failed / burnt",
+    "department": "Department of Energy",
+    "description": "Power Supply Failure. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/upcl-department/distribution-transformer-failed-or-burnt.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-32",
+    "title": "Bill Review Related",
+    "department": "Department of Energy",
+    "description": "WSS Related Complaints. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/upcl-department/bill-review-related.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-33",
+    "title": "Registration in Class E",
+    "department": "Minor Irrigation Department",
+    "description": "Registration of Contractors. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/minor-irrigation-department/class-e-registration.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-34",
+    "title": "Renewal of Class C (Existing)",
+    "department": "Minor Irrigation Department",
+    "description": "ठेकेदारों के पंजीकरण का नवीनीकरण (मौजूदा). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/minor-irrigation-department/renewal-in-category-c-existing.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-35",
+    "title": "Domestic Help Verification",
+    "department": "Home Department",
+    "description": "CCTNS की सेवाएं. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/home-department/domestic-help-verification.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-36",
+    "title": "Solvency Certificate",
+    "department": "Revenue Department",
+    "description": "Revenue Certificates. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/revenue-department/solvency-certificate.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-37",
+    "title": "Repair of Dist. Line/Transformer/Capacitor",
+    "department": "Department of Energy",
+    "description": "Voltage Fluctuation. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/upcl-department/repair-of-dist-line-transformer-capacitor.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-38",
+    "title": "Renewal of Class A (Existing)",
+    "department": "Minor Irrigation Department",
+    "description": "ठेकेदारों के पंजीकरण का नवीनीकरण (मौजूदा). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/minor-irrigation-department/renewal-in-category-a-existing.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-39",
+    "title": "Renewal of Class B (Non-Existing)",
+    "department": "Minor Irrigation Department",
+    "description": "Renewal of Contractors' Registration (Non-Existing). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/minor-irrigation-department/renewal-in-category-b-non-existing.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-40",
+    "title": "Tenant Verification",
+    "department": "Home Department",
+    "description": "CCTNS की सेवाएं. CSC/EDC Fee: ₹0",
+    "icon": "/icons/services/home-department/tenant-verification.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-41",
+    "title": "Character Certificate (General)",
+    "department": "Revenue Department",
+    "description": "Revenue Certificates. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/revenue-department/character-certificate-general.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-42",
+    "title": "Income Certificate",
+    "department": "Revenue Department",
+    "description": "Revenue Certificates. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/revenue-department/income-certificate.png",
+    "route": "/services/revenue/income-certificate",
+    "category": "Service"
+  },
+  {
+    "id": "srv-43",
+    "title": "Renewal in Employment Registration",
+    "department": "Directorate of Training & Employment",
+    "description": "सेवायोजन कार्यालय. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/employment-dept/renewal-in-employment-registration.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-44",
+    "title": "Editing of family",
+    "department": "Panchayati Raj Department",
+    "description": "Panchayti Related Services. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/editing-of-family.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-45",
+    "title": "Death Registration /Certificate (Rural) Within one month",
+    "department": "Panchayati Raj Department",
+    "description": "Birth/Death Certificate (Rural). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/death-certificate-within-one-month.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-46",
+    "title": "Death Registration /Certificate (Rural) After one years",
+    "department": "Panchayati Raj Department",
+    "description": "Birth/Death Certificate (Rural). CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/panchayati-raj-development/death-certificate-after-one-year.png",
+    "route": "",
+    "category": "Service"
+  },
+  {
+    "id": "srv-47",
+    "title": "Pond Construction / Renovation",
+    "department": "Fisheries Department",
+    "description": "Fisheries Services. CSC/EDC Fee: ₹40",
+    "icon": "/icons/services/fisheries-department/pond-construction-renovation.png",
+    "route": "",
+    "category": "Service"
+  }
+]

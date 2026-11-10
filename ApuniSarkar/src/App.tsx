@@ -70,7 +70,8 @@ export const App: React.FC = () => {
   };
 
   const renderActivePage = () => {
-    switch (currentRoute) {
+    const baseRoute = currentRoute.split('?')[0];
+    switch (baseRoute) {
       case '/':
         return <HomePage onNavigate={navigate} />;
       case '/all-services':

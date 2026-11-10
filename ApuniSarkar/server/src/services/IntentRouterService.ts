@@ -70,9 +70,11 @@ export class IntentRouterService {
       };
     }
 
-    // 4. Form Field Filling Check: If user is on a form route and gives slot values or field directives
+    // 4. Form Field Filling Check: If user is on a dedicated form route and gives slot values or field directives
     if (
-      (currentRoute.includes('/services/') || currentRoute.includes('/forms/')) &&
+      currentRoute !== '/all-services' &&
+      !currentRoute.startsWith('/all-services') &&
+      (currentRoute.includes('/services/revenue/') || currentRoute.includes('/services/panchayati-raj/') || currentRoute.includes('/forms/')) &&
       (hasExtractedSlots || lower.includes('enter') || lower.includes('select') || lower.includes('field') || lower.includes('दर्ज') || lower.includes('भरो'))
     ) {
       const fieldNames = Object.keys(extractedSlots).join(', ');

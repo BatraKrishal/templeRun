@@ -22,6 +22,48 @@ export const ServicesDirectoryPage: React.FC<{ onNavigate: (route: string) => vo
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedServiceForModal, setSelectedServiceForModal] = useState<ServiceItem | null>(null);
 
+  // Sync search & selected service from URL query params or voice navigation event
+  React.useEffect(() => {
+    const parseParams = (customSearch?: string, customServiceId?: string) => {
+      const params = new URLSearchParams(window.location.search);
+      const searchQ = customSearch || params.get('search');
+      const serviceId = customServiceId || params.get('service');
+
+      if (searchQ) {
+        setSearchTerm(searchQ);
+      }
+      if (serviceId) {
+        const found = (officialServicesData as ServiceItem[]).find((s) => s.id === serviceId);
+        if (found) {
+          setSelectedServiceForModal(found);
+        }
+      } else if (searchQ) {
+        const found = (officialServicesData as ServiceItem[]).find(
+          (s) => s.title.toLowerCase().includes(searchQ.toLowerCase()) ||
+                 searchQ.toLowerCase().includes(s.title.toLowerCase())
+        );
+        if (found) {
+          setSelectedServiceForModal(found);
+        }
+      }
+    };
+
+    parseParams();
+    window.addEventListener('popstate', () => parseParams());
+
+    const handleVoiceSearch = (e: any) => {
+      if (e.detail?.search || e.detail?.serviceId) {
+        parseParams(e.detail.search, e.detail.serviceId);
+      }
+    };
+    window.addEventListener('voice-service-select', handleVoiceSearch);
+
+    return () => {
+      window.removeEventListener('popstate', () => parseParams());
+      window.removeEventListener('voice-service-select', handleVoiceSearch);
+    };
+  }, []);
+
   const departments = ['All Departments', ...Array.from(new Set(officialServicesData.map((s) => s.department)))];
 
   const filteredServices = (officialServicesData as ServiceItem[]).filter((s) => {

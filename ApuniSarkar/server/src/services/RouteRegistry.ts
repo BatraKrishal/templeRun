@@ -4,6 +4,23 @@
  * multilingual synonyms, ambiguity detection, and fuzzy matching.
  */
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const SERVICES_DATA_PATH = path.resolve(__dirname, '../data/officialServices.json');
+
+let catalogServicesCache: any[] = [];
+try {
+  if (fs.existsSync(SERVICES_DATA_PATH)) {
+    catalogServicesCache = JSON.parse(fs.readFileSync(SERVICES_DATA_PATH, 'utf8'));
+  }
+} catch (e) {
+  console.warn('[RouteRegistry] Failed to load officialServices.json:', e);
+}
+
 export interface RouteEntry {
   path: string;
   id: string;
@@ -357,9 +374,9 @@ export class RouteRegistry {
 
     // 2. Strip conversational navigation filler phrases
     const stripped = lower
-      .replace(/^(please\s+)?(go\s+to(\s+the)?|take\s+me\s+to(\s+the)?|open(\s+the)?|navigate\s+to(\s+the)?|show\s+me(\s+the)?|i\s+want\s+to\s+go\s+to(\s+the)?|i\s+want\s+to(\s+open)?)\s+/i, '')
+      .replace(/^(please\s+)?(i\s+want\s+to\s+(go\s+to|open|see|visit|apply\s+for|view)|take\s+me\s+to(\s+the)?|go\s+to(\s+the)?|go\s+|open(\s+the)?|navigate\s+to(\s+the)?|show\s+me(\s+the)?|show(\s+the)?|view(\s+the)?|apply\s+for(\s+the)?|search\s+(for\s+)?)\s+/i, '')
       .replace(/^(mujhe\s+)?(par\s+le\s+chalo|pe\s+le\s+chalo|kholo|par\s+jao|pe\s+jao|dikhao|le\s+chalo)\s+/i, '')
-      .replace(/\s+(page|portal|screen|par\s+le\s+chalo|pe\s+le\s+chalo|kholo|par\s+jao|pe\s+jao|dikhao|le\s+chalo|chahiye|karna\s+hai|karein|karo)$/i, '')
+      .replace(/\s+(page|portal|screen|par\s+le\s+chalo|pe\s+le\s+chalo|kholo|par\s+jao|pe\s+jao|dikhao|le\s+chalo|chahiye|karna\s+hai|karein|karo|par\s+jana\s+hai|pe\s+jana\s+hai)$/i, '')
       .trim();
 
     // 3. Exact alias and title matching
@@ -380,6 +397,62 @@ export class RouteRegistry {
           spokenResponseEnglish: `Navigating to ${route.titleEn}.`,
           spokenResponseHindi: `${route.titleHi} खोला जा रहा है।`,
           spokenResponseHinglish: `${route.titleEn} page khola ja raha hai.`,
+        };
+      }
+    }
+
+    // 3b. Official Services Catalog Search & Navigation (e.g. "Registration in Class D", "Missing Person", "Tap of Transformer")
+    for (const s of catalogServicesCache) {
+      const sTitle = s.title.toLowerCase();
+      const sDept = s.department?.toLowerCase() || '';
+
+      const matchesDirectly =
+        stripped === sTitle ||
+        lower === sTitle ||
+        (sTitle.length >= 6 && (stripped.includes(sTitle) || lower.includes(sTitle))) ||
+        (stripped.length >= 6 && sTitle.includes(stripped));
+
+      const matchesClassD =
+        (stripped.includes('class d') || lower.includes('class d') || stripped.includes('क्लास डी')) &&
+        sTitle.includes('class d') &&
+        (stripped.includes('renewal') ? sTitle.includes('renewal') : !sTitle.includes('renewal'));
+
+      const matchesClassE =
+        (stripped.includes('class e') || lower.includes('class e') || stripped.includes('क्लास ई')) &&
+        sTitle.includes('class e') &&
+        (stripped.includes('renewal') ? sTitle.includes('renewal') : !sTitle.includes('renewal'));
+
+      if (matchesDirectly || matchesClassD || matchesClassE) {
+        let targetRoute = `/all-services?search=${encodeURIComponent(s.title)}&service=${s.id}`;
+
+        if (sTitle.includes('income')) {
+          targetRoute = '/services/revenue/income-certificate';
+        } else if (sTitle.includes('domicile') || sTitle.includes('caste') || sTitle.includes('residence')) {
+          targetRoute = '/services/revenue/domicile-certificate';
+        } else if (sTitle.includes('hill area')) {
+          targetRoute = '/services/revenue/hill-area-certificate';
+        } else if (sTitle.includes('pariwar') || sTitle.includes('family register')) {
+          targetRoute = '/services/panchayati-raj/pariwar-register';
+        }
+
+        return {
+          status: 'FOUND',
+          targetRoute,
+          routeDefinition: {
+            path: targetRoute,
+            id: s.id,
+            titleEn: s.title,
+            titleHi: s.title,
+            category: 'service',
+            aliasesEn: [s.title],
+            aliasesHi: [s.title],
+            aliasesHinglish: [s.title],
+            descriptionEn: s.description,
+            descriptionHi: s.description,
+          },
+          spokenResponseEnglish: `Navigating to ${s.title} under ${s.department}.`,
+          spokenResponseHindi: `${s.department} के अंतर्गत "${s.title}" सेवा खोली जा रही है।`,
+          spokenResponseHinglish: `${s.department} ki "${s.title}" service kholi ja rahi hai.`,
         };
       }
     }

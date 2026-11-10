@@ -490,6 +490,43 @@ async function runEndToEndVerification() {
     assert(false, 'Language detection tests failed', err.message);
   }
 
+  // 23. Catalog Services Deep Voice Navigation (e.g. "Registration in Class D")
+  try {
+    const res1 = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'I want to go to registration in class D',
+        currentRoute: '/all-services',
+      }),
+    });
+    const data1: any = await res1.json();
+    assert(
+      data1.intent === 'NAVIGATE' &&
+      data1.targetRoute?.includes('/all-services') &&
+      data1.targetRoute?.includes('Class%20D'),
+      'Catalog query "I want to go to registration in class D" navigates to Registration in Class D filter',
+      data1
+    );
+
+    const res2 = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'go registration in class D',
+        currentRoute: '/all-services',
+      }),
+    });
+    const data2: any = await res2.json();
+    assert(
+      data2.intent === 'NAVIGATE' && data2.targetRoute?.includes('Class%20D'),
+      'Shorthand query "go registration in class D" navigates to Registration in Class D',
+      data2
+    );
+  } catch (err: any) {
+    assert(false, 'Catalog voice navigation test failed', err.message);
+  }
+
   console.log('================================================================');
   console.log(` VERIFICATION COMPLETE: ${passedTests} / ${totalTests} CHECKS PASSED`);
   console.log('================================================================');

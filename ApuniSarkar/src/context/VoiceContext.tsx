@@ -444,22 +444,37 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // 4. CHECK VISIBLE FORM FIELDS & PRIORITIZE FORM INTERACTION
     const visibleFields = FormInteractionEngine.getVisibleFields();
+    // Only dedicated application form pages are treated as form filling contexts (/all-services is a catalog directory)
     const isFormPage =
-      visibleFields.length > 0 ||
-      currentPath.includes('/services/') ||
-      currentPath.includes('/forms/') ||
-      currentPath.includes('/download-certificates') ||
-      currentPath.includes('/track');
+      currentPath !== '/all-services' &&
+      !currentPath.startsWith('/all-services') &&
+      (currentPath.startsWith('/services/revenue/') ||
+       currentPath.startsWith('/services/panchayati-raj/') ||
+       currentPath.startsWith('/forms/'));
 
     const isExplicitNavigation =
+      voiceMode === 'NAVIGATION' ||
       lower.startsWith('go to ') ||
+      lower.startsWith('go ') ||
       lower.startsWith('open ') ||
       lower.startsWith('take me to ') ||
       lower.startsWith('navigate to ') ||
       lower.startsWith('return to ') ||
+      lower.startsWith('i want to go to ') ||
+      lower.startsWith('i want to open ') ||
+      lower.startsWith('i want to see ') ||
+      lower.startsWith('i want to ') ||
+      lower.startsWith('show me ') ||
+      lower.startsWith('show ') ||
+      lower.startsWith('search for ') ||
+      lower.startsWith('search ') ||
+      lower.startsWith('apply for ') ||
       lower.startsWith('wapas ') ||
       lower.endsWith(' kholo') ||
       lower.endsWith(' jao') ||
+      lower.endsWith(' dikhao') ||
+      lower.endsWith(' le chalo') ||
+      lower.endsWith(' jana hai') ||
       lower === 'back' ||
       lower === 'dashboard' ||
       lower === 'home';
@@ -581,15 +596,30 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (navHandler) {
         navHandler(targetRoute);
 
+        // If navigating to service directory with specific service filter, dispatch event for immediate in-page UI update
+        if (targetRoute.includes('/all-services')) {
+          const queryPart = targetRoute.split('?')[1] || '';
+          const params = new URLSearchParams(queryPart);
+          const searchQ = params.get('search');
+          const serviceId = params.get('service');
+          if (searchQ || serviceId) {
+            window.dispatchEvent(
+              new CustomEvent('voice-service-select', {
+                detail: { search: searchQ, serviceId },
+              })
+            );
+          }
+        }
+
         // ACTION RESULT VERIFICATION: Verify that router state actually updated
         await new Promise((r) => setTimeout(r, 150));
         const newPath = window.location.pathname;
-        const verified = newPath === targetRoute || currentPath !== targetRoute;
+        const verified = newPath === targetRoute || currentPath !== targetRoute || targetRoute.includes('/all-services');
 
         if (verified) {
-          const successEn = `Navigated to ${routeRes.routeDefinition?.titleEn || 'requested page'}.`;
-          const successHi = `${routeRes.routeDefinition?.titleHi || 'पेज'} खोला गया।`;
-          const successHinglish = `${routeRes.routeDefinition?.titleEn || 'Page'} khol diya gaya hai.`;
+          const successEn = routeRes.spokenResponseEnglish || `Navigated to ${routeRes.routeDefinition?.titleEn || 'requested page'}.`;
+          const successHi = routeRes.spokenResponseHindi || `${routeRes.routeDefinition?.titleHi || 'पेज'} खोला गया।`;
+          const successHinglish = routeRes.spokenResponseHinglish || `${routeRes.routeDefinition?.titleEn || 'Page'} khol diya gaya hai.`;
 
           const replyToSpeak = pickResponse(detectedLang, successEn, successHi, successHinglish);
 
