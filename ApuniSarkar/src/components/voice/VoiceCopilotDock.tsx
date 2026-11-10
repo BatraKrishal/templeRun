@@ -23,6 +23,7 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
     stopSpeaking,
     recognitionLang,
     setRecognitionLang,
+    isHandsFreeActive,
   } = useVoice();
 
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -142,7 +143,7 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
         </div>
 
         {/* Mode Switcher Banner */}
-        <div className="bg-gray-100/95 border-b border-gray-200 px-3.5 py-2 flex items-center justify-between text-[11px] select-none">
+        <div className="bg-gray-100/95 border-b border-gray-200 px-3.5 py-1.5 flex items-center justify-between text-[11px] select-none">
           <div className="flex items-center gap-1.5">
             <span className="text-gray-500 font-medium">मोड:</span>
             <button
@@ -169,14 +170,19 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setVoiceMode(effectiveMode === 'FORM' ? 'NAVIGATION' : 'FORM')}
-            className="text-[10px] font-semibold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
-            title="Click to switch modes"
-          >
-            <span>{effectiveMode === 'FORM' ? 'नेविगेशन बदलें 🌐' : 'फॉर्म मोड बदलें 📝'}</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                isHandsFreeActive
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                  : 'bg-gray-100 text-gray-600 border-gray-300'
+              }`}
+              title={isHandsFreeActive ? "सतत बातचीत ऑन ('रुको' या 'Stop' बोलकर रोक सकते हैं)" : 'माइक बंद है'}
+            >
+              <span className={`size-1.5 rounded-full ${isHandsFreeActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`}></span>
+              <span>{isHandsFreeActive ? 'सतत संवाद (Continuous)' : 'माइक पॉज्ड (Paused)'}</span>
+            </span>
+          </div>
         </div>
 
         {/* Expanded Body */}
@@ -202,7 +208,13 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
             {/* Status / Transcript Wave */}
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between text-[11px] font-semibold text-ink-700">
-                <span>{isListening ? '🔴 नागरिक आवाज रिकॉर्ड हो रही है...' : '🎙️ अपनी भाषा में बोलें:'}</span>
+                <span>
+                  {isListening
+                    ? '🔴 आवाज सुन रहे हैं (Continuous)...'
+                    : isSpeaking
+                    ? '🔊 ई-सहायक बोल रहा है...'
+                    : '🎙️ अपनी भाषा में बोलें:'}
+                </span>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"

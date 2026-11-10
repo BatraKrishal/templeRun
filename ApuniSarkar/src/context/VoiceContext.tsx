@@ -29,6 +29,7 @@ interface VoiceContextType extends VoiceState {
   updateFormSlot?: (key: string, value: any) => void;
   clearConversation?: () => void;
   sessionId?: string;
+  isHandsFreeActive?: boolean;
   setHandsFreeMode?: (enabled: boolean) => void;
   toggleHandsFree?: () => void;
 }
@@ -42,14 +43,29 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeFieldId, setActiveFieldId] = useState<string | undefined>(undefined);
   const [formSlots, setFormSlots] = useState<Record<string, any>>({});
   const [sessionId] = useState<string>(() => `uk_ses_${Date.now()}`);
+  const [isHandsFreeActive, setIsHandsFreeActive] = useState<boolean>(true);
+
+  const handsFreeRef = useRef<boolean>(true);
+  const isSpeakingRef = useRef<boolean>(false);
+  const autoRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const updateFormSlot = (key: string, value: any) => {
     setFormSlots((prev) => ({ ...prev, [key]: value }));
   };
   const clearConversation = () => {
     setFormSlots({});
   };
-  const setHandsFreeMode = (_enabled: boolean) => {};
-  const toggleHandsFree = () => {};
+  const setHandsFreeMode = (enabled: boolean) => {
+    handsFreeRef.current = enabled;
+    setIsHandsFreeActive(enabled);
+    if (!enabled && autoRestartTimeoutRef.current) {
+      clearTimeout(autoRestartTimeoutRef.current);
+      autoRestartTimeoutRef.current = null;
+    }
+  };
+  const toggleHandsFree = () => {
+    setHandsFreeMode(!handsFreeRef.current);
+  };
   const [recognitionLang, setRecognitionLangState] = useState<'en-IN' | 'hi-IN'>(
     uiLanguage === 'hi' ? 'hi-IN' : 'en-IN'
   );
@@ -220,7 +236,13 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [recognitionLang]);
 
   const startListening = () => {
+    if (autoRestartTimeoutRef.current) {
+      clearTimeout(autoRestartTimeoutRef.current);
+      autoRestartTimeoutRef.current = null;
+    }
     stopSpeaking();
+    handsFreeRef.current = true;
+    setIsHandsFreeActive(true);
     accumulatedTranscriptRef.current = '';
     lastExecutedTextRef.current = '';
     isListeningRef.current = true;
@@ -244,8 +266,16 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const stopListening = () => {
+  const stopListening = (disableHandsFree: boolean = false) => {
     isListeningRef.current = false;
+    if (disableHandsFree) {
+      handsFreeRef.current = false;
+      setIsHandsFreeActive(false);
+      if (autoRestartTimeoutRef.current) {
+        clearTimeout(autoRestartTimeoutRef.current);
+        autoRestartTimeoutRef.current = null;
+      }
+    }
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
@@ -259,11 +289,20 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const toggleListening = () => {
-    if (state.isListening) stopListening();
-    else startListening();
+    if (state.isListening) {
+      // User explicitly clicked the microphone to mute / pause
+      stopListening(true);
+      stopSpeaking();
+    } else {
+      // User clicked the microphone to talk
+      handsFreeRef.current = true;
+      setIsHandsFreeActive(true);
+      startListening();
+    }
   };
 
   const stopSpeaking = () => {
+    isSpeakingRef.current = false;
     if (audioPlayerRef.current) {
       audioPlayerRef.current.pause();
       audioPlayerRef.current = null;
@@ -274,10 +313,35 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setState((prev) => ({ ...prev, isSpeaking: false }));
   };
 
-  const speakText = async (text: string, lang?: 'hi' | 'en'): Promise<void> => {
+  const speakText = async (
+    text: string,
+    lang?: 'hi' | 'en',
+    allowAutoResume: boolean = true
+  ): Promise<void> => {
     stopSpeaking();
+    isSpeakingRef.current = true;
     setState((prev) => ({ ...prev, isSpeaking: true }));
     const speechLang = lang || 'hi';
+
+    const handleSpeechEnd = () => {
+      isSpeakingRef.current = false;
+      setState((prev) => ({ ...prev, isSpeaking: false }));
+
+      // If continuous hands-free turn taking is enabled, resume microphone after acoustic echo buffer
+      if (allowAutoResume && handsFreeRef.current) {
+        if (autoRestartTimeoutRef.current) {
+          clearTimeout(autoRestartTimeoutRef.current);
+        }
+        // 280ms acoustic buffer prevents the microphone from capturing speaker audio reverberations
+        autoRestartTimeoutRef.current = setTimeout(() => {
+          if (handsFreeRef.current && !isListeningRef.current && !isSpeakingRef.current && !isExecutingRef.current) {
+            accumulatedTranscriptRef.current = '';
+            lastExecutedTextRef.current = '';
+            startListening();
+          }
+        }, 280);
+      }
+    };
 
     try {
       // 1. Call Backend ElevenLabs proxy endpoint with Key Rotation & Audio Hash Caching
@@ -297,13 +361,13 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         audioPlayerRef.current = audio;
 
         audio.onended = () => {
-          setState((prev) => ({ ...prev, isSpeaking: false }));
           URL.revokeObjectURL(audioUrl);
+          handleSpeechEnd();
         };
 
         audio.onerror = (e) => {
           console.warn('[VoiceContext] Audio stream error, falling back to Web Speech API', e);
-          fallbackBrowserSpeech(text, speechLang);
+          fallbackBrowserSpeech(text, speechLang, allowAutoResume, handleSpeechEnd);
         };
 
         try {
@@ -311,7 +375,7 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return;
         } catch (playErr) {
           console.warn('[VoiceContext] Audio play() failed (e.g. autoplay policy), falling back to browser speech:', playErr);
-          fallbackBrowserSpeech(text, speechLang);
+          fallbackBrowserSpeech(text, speechLang, allowAutoResume, handleSpeechEnd);
           return;
         }
       }
@@ -320,10 +384,15 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     // 2. Fail-safe Fallback: Web Speech API
-    fallbackBrowserSpeech(text, speechLang);
+    fallbackBrowserSpeech(text, speechLang, allowAutoResume, handleSpeechEnd);
   };
 
-  const fallbackBrowserSpeech = (text: string, lang: 'hi' | 'en') => {
+  const fallbackBrowserSpeech = (
+    text: string,
+    lang: 'hi' | 'en',
+    _allowAutoResume: boolean = true,
+    onEndCallback?: () => void
+  ) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       setTimeout(() => {
@@ -331,16 +400,30 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
         utterance.rate = 1.0;
         utterance.onend = () => {
-          setState((prev) => ({ ...prev, isSpeaking: false }));
+          if (onEndCallback) {
+            onEndCallback();
+          } else {
+            isSpeakingRef.current = false;
+            setState((prev) => ({ ...prev, isSpeaking: false }));
+          }
         };
         utterance.onerror = (e) => {
           console.warn('[VoiceContext] Speech synthesis error:', e);
-          setState((prev) => ({ ...prev, isSpeaking: false }));
+          if (onEndCallback) {
+            onEndCallback();
+          } else {
+            isSpeakingRef.current = false;
+            setState((prev) => ({ ...prev, isSpeaking: false }));
+          }
         };
         window.speechSynthesis.speak(utterance);
       }, 50);
     } else {
-      setState((prev) => ({ ...prev, isSpeaking: false }));
+      if (onEndCallback) onEndCallback();
+      else {
+        isSpeakingRef.current = false;
+        setState((prev) => ({ ...prev, isSpeaking: false }));
+      }
     }
   };
 
@@ -382,6 +465,118 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const currentPath = window.location.pathname || '/';
     const lower = trimmed.toLowerCase();
+
+    // 1b. CHECK FOR EXPLICIT STOP / PAUSE DIRECTIVES
+    const isStopCommand =
+      lower === 'stop' ||
+      lower === 'stop listening' ||
+      lower === 'pause' ||
+      lower === 'mute' ||
+      lower === 'bye' ||
+      lower === 'goodbye' ||
+      lower === 'रुको' ||
+      lower === 'रुक जाओ' ||
+      lower === 'शांत' ||
+      lower === 'चुप' ||
+      lower === 'बस' ||
+      lower === 'अलविदा' ||
+      lower === 'म्यूट';
+
+    if (isStopCommand) {
+      handsFreeRef.current = false;
+      setIsHandsFreeActive(false);
+      stopListening(true);
+      stopSpeaking();
+      const pauseMsg = pickResponse(
+        detectedLang,
+        'Continuous listening paused. Click the microphone whenever you want to speak again.',
+        'सतत बातचीत रोक दी गई है। जब भी आप बोलना चाहें, माइक बटन दबाएं।',
+        'Continuous listening pause ho gayi hai. Jab bhi bolna chahein, mic button dabayein.'
+      );
+      setState((prev) => ({
+        ...prev,
+        isProcessing: false,
+        isListening: false,
+        actionStatus: 'SUCCESS',
+        assistantReplyEnglish: 'Continuous listening paused. Click the microphone whenever you want to speak again.',
+        assistantReplyHindi: 'सतत बातचीत रोक दी गई है। जब भी बोलना चाहें, माइक बटन दबाएं।',
+      }));
+      await speakText(pauseMsg, ttsLang, false);
+      return;
+    }
+
+    // 1c. CHECK FOR SPOKEN CONFIRMATION / REJECTION (SIGN-OFF MODAL & SUBMISSIONS)
+    const isSignOffModalInDom = Boolean(
+      document.querySelector('[aria-label="Citizen Verification & Sign-off"]') ||
+      document.querySelector('.backdrop-blur-xs')
+    );
+
+    if (isConfirmationPending || isSignOffModalInDom) {
+      const isAffirmative =
+        lower === 'yes' ||
+        lower === 'confirm' ||
+        lower === 'submit' ||
+        lower === 'submit form' ||
+        lower === 'i confirm' ||
+        lower === 'haan' ||
+        lower === 'ha' ||
+        lower === 'thik hai' ||
+        lower === 'हाँ' ||
+        lower === 'हां' ||
+        lower === 'स्वीकृत है' ||
+        lower === 'जमा करो' ||
+        lower === 'फॉर्म जमा करो' ||
+        lower === 'सहमति है' ||
+        lower === 'सही है' ||
+        lower === 'पुष्टि करो';
+
+      const isNegative =
+        lower === 'no' ||
+        lower === 'cancel' ||
+        lower === 'nahin' ||
+        lower === 'nahi' ||
+        lower === 'नहीं' ||
+        lower === 'रद्द करो' ||
+        lower === 'बंद करो';
+
+      if (isAffirmative) {
+        window.dispatchEvent(new CustomEvent('voice-signoff-confirm'));
+        const confirmMsg = pickResponse(
+          detectedLang,
+          'Application confirmed and submitted successfully!',
+          'आवेदन स्वीकृत कर जमा किया जा रहा है। बधाई हो!',
+          'Application confirm kar submit kiya ja raha hai!'
+        );
+        setState((prev) => ({
+          ...prev,
+          isProcessing: false,
+          actionStatus: 'SUCCESS',
+          assistantReplyEnglish: 'Application confirmed and submitted successfully!',
+          assistantReplyHindi: 'आवेदन स्वीकृत कर जमा किया जा रहा है। बधाई हो!',
+        }));
+        await speakText(confirmMsg, ttsLang, true);
+        return;
+      }
+
+      if (isNegative) {
+        window.dispatchEvent(new CustomEvent('voice-signoff-cancel'));
+        const cancelMsg = pickResponse(
+          detectedLang,
+          'Submission cancelled. You can review and edit your form.',
+          'आवेदन रद्द कर दिया गया है। आप फॉर्म में बदलाव कर सकते हैं।',
+          'Application cancel kar diya gaya. Aap form edit kar sakte hain.'
+        );
+        setState((prev) => ({
+          ...prev,
+          isProcessing: false,
+          actionStatus: 'SUCCESS',
+          assistantReplyEnglish: 'Submission cancelled. You can review and edit your form.',
+          assistantReplyHindi: 'आवेदन रद्द कर दिया गया है। आप फॉर्म में बदलाव कर सकते हैं।',
+        }));
+        await speakText(cancelMsg, ttsLang, true);
+        return;
+      }
+    }
 
     // 2. CHECK FOR VOICE MODE TOGGLE DIRECTIVES
     if (
@@ -893,6 +1088,7 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateFormSlot,
         clearConversation,
         sessionId,
+        isHandsFreeActive,
         setHandsFreeMode,
         toggleHandsFree,
       }}

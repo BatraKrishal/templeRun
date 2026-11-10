@@ -80,7 +80,7 @@ export class FormInteractionEngine {
 
       const id = el.id || '';
       const name = (el as HTMLInputElement).name || '';
-      const type = (el as HTMLInputElement).type || el.tagName.toLowerCase();
+      const type = el.tagName === 'SELECT' ? 'select' : ((el as HTMLInputElement).type?.toLowerCase() || el.tagName.toLowerCase());
       const placeholder = (el as HTMLInputElement).placeholder || '';
       const ariaLabel = el.getAttribute('aria-label') || '';
 
@@ -631,14 +631,24 @@ export class FormInteractionEngine {
       if (targetField) {
         const ok = FormInteractionEngine.setFieldValue(targetField.element, optionVal);
         if (ok) {
+          const canonicalVal = (targetField.element as any)._resolvedValue ?? optionVal;
+          const displayVal = (targetField.element as any)._resolvedLabel ?? optionVal;
+          const isSelect = targetField.type === 'select' || targetField.element.tagName === 'SELECT';
+
           return {
             status: 'SUCCESS',
             fieldId: targetField.id,
             fieldName: targetField.label || targetField.name,
-            updatedValue: optionVal,
-            messageEn: `Selected ${optionVal} for ${targetField.label || targetField.name}.`,
-            messageHi: `${targetField.label || 'फ़ील्ड'} के लिए ${optionVal} चुना गया।`,
-            messageHinglish: `${targetField.label || 'Field'} ke liye ${optionVal} select kar diya.`,
+            updatedValue: canonicalVal,
+            messageEn: isSelect
+              ? `Selected "${displayVal}" for ${targetField.label || targetField.name}.`
+              : `Entered "${canonicalVal}" in ${targetField.label || targetField.name}.`,
+            messageHi: isSelect
+              ? `${targetField.label || 'फ़ील्ड'} के लिए "${displayVal}" चुना गया।`
+              : `${targetField.label || 'फ़ील्ड'} में "${canonicalVal}" दर्ज कर दिया है।`,
+            messageHinglish: isSelect
+              ? `${targetField.label || 'Field'} ke liye "${displayVal}" select kar diya.`
+              : `${targetField.label || 'Field'} mein "${canonicalVal}" enter kar diya hai.`,
           };
         }
       }
@@ -675,14 +685,24 @@ export class FormInteractionEngine {
 
         const ok = FormInteractionEngine.setFieldValue(match.field.element, finalVal);
         if (ok) {
+          const canonicalVal = (match.field.element as any)._resolvedValue ?? finalVal;
+          const displayVal = (match.field.element as any)._resolvedLabel ?? finalVal;
+          const isSelect = match.field.type === 'select' || match.field.element.tagName === 'SELECT';
+
           return {
             status: 'SUCCESS',
             fieldId: match.field.id,
             fieldName: match.field.label || match.field.name,
-            updatedValue: finalVal,
-            messageEn: `Entered "${finalVal}" in ${match.field.label || match.field.name}.`,
-            messageHi: `${match.field.label || 'फ़ील्ड'} में "${finalVal}" दर्ज कर दिया है।`,
-            messageHinglish: `${match.field.label || 'Field'} mein "${finalVal}" enter kar diya hai.`,
+            updatedValue: canonicalVal,
+            messageEn: isSelect
+              ? `Selected "${displayVal}" for ${match.field.label || match.field.name}.`
+              : `Entered "${finalVal}" in ${match.field.label || match.field.name}.`,
+            messageHi: isSelect
+              ? `${match.field.label || 'फ़ील्ड'} के लिए "${displayVal}" चुना गया।`
+              : `${match.field.label || 'फ़ील्ड'} में "${finalVal}" दर्ज कर दिया है।`,
+            messageHinglish: isSelect
+              ? `${match.field.label || 'Field'} ke liye "${displayVal}" select kar diya.`
+              : `${match.field.label || 'Field'} mein "${finalVal}" enter kar diya hai.`,
           };
         }
       } else if (match.status === 'AMBIGUOUS' && match.candidates) {
@@ -846,22 +866,24 @@ export class FormInteractionEngine {
               const canonicalValue = (cand.field.element as any)._resolvedValue ?? valToSet;
               const displayLabel = (cand.field.element as any)._resolvedLabel ?? valToSet;
 
+              const isSelect = cand.field.type === 'select' || cand.field.element.tagName === 'SELECT';
+
               return {
                 status: 'SUCCESS',
                 fieldId: cand.field.id,
                 fieldName: cand.field.label || cand.field.name,
                 updatedValue: canonicalValue,
-                messageEn: cand.field.type === 'select'
+                messageEn: isSelect
                   ? `Selected "${displayLabel}" for ${cand.field.label || cand.field.name}.`
                   : `Entered "${valToSet}" in ${cand.field.label || cand.field.name}.`,
-                messageHi: cand.field.type === 'select'
+                messageHi: isSelect
                   ? `${cand.field.label || 'फ़ील्ड'} के लिए "${displayLabel}" चुना गया।`
                   : `${cand.field.label || 'फ़ील्ड'} में "${valToSet}" दर्ज कर दिया है।`,
-                messageHinglish: cand.field.type === 'select'
+                messageHinglish: isSelect
                   ? `${cand.field.label || 'Field'} ke liye "${displayLabel}" select kar diya.`
                   : `${cand.field.label || 'Field'} mein "${valToSet}" enter kar diya hai.`,
               };
-            } else if (cand.field.type === 'select') {
+            } else if (cand.field.type === 'select' || cand.field.element.tagName === 'SELECT') {
               const validOpts = cand.field.options
                 ?.filter((o) => o.value)
                 .map((o) => o.text.split('(')[0].trim())
@@ -900,18 +922,20 @@ export class FormInteractionEngine {
           const canonicalValue = (match.field.element as any)._resolvedValue ?? valToSet;
           const displayLabel = (match.field.element as any)._resolvedLabel ?? valToSet;
 
+          const isSelect = match.field.type === 'select' || match.field.element.tagName === 'SELECT';
+
           return {
             status: 'SUCCESS',
             fieldId: match.field.id,
             fieldName: match.field.label || match.field.name,
             updatedValue: canonicalValue,
-            messageEn: match.field.type === 'select'
+            messageEn: isSelect
               ? `Selected "${displayLabel}" for ${match.field.label || match.field.name}.`
               : `Entered "${valToSet}" in ${match.field.label || match.field.name}.`,
-            messageHi: match.field.type === 'select'
+            messageHi: isSelect
               ? `${match.field.label || 'फ़ील्ड'} के लिए "${displayLabel}" चुना गया।`
               : `${match.field.label || 'फ़ील्ड'} में "${valToSet}" दर्ज कर दिया है।`,
-            messageHinglish: match.field.type === 'select'
+            messageHinglish: isSelect
               ? `${match.field.label || 'Field'} ke liye "${displayLabel}" select kar diya.`
               : `${match.field.label || 'Field'} mein "${valToSet}" enter kar diya hai.`,
           };
