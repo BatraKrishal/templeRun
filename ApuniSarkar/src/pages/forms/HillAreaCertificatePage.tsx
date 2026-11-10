@@ -8,7 +8,7 @@ import { CertificateViewer } from '../../components/certificates/CertificateView
 
 export const HillAreaCertificatePage: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { language } = useAccessibility();
-  const { registerSlotListener, speakText, isConfirmationPending } = useVoice();
+  const { registerSlotListener, speakText } = useVoice();
 
   const [formData, setFormData] = useState({
     applicant_name: '',
@@ -22,12 +22,6 @@ export const HillAreaCertificatePage: React.FC<{ onNavigate: (route: string) => 
   const [voiceFilledFields, setVoiceFilledFields] = useState<Record<string, boolean>>({});
   const [isSignOffOpen, setIsSignOffOpen] = useState(false);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isConfirmationPending) {
-      setIsSignOffOpen(true);
-    }
-  }, [isConfirmationPending]);
 
   useEffect(() => {
     const unsub = registerSlotListener((slots) => {
