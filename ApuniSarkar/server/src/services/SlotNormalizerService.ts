@@ -78,7 +78,6 @@ export class SlotNormalizerService {
         slots.applicant_name = this.cleanName(spokenText);
       }
     }
-    }
 
     // 4. Detect Father/Husband Name patterns
     // e.g. "father name Indra Singh Bisht", "father's name Indra Singh Bisht", "पिता का नाम इन्द्र सिंह बिष्ट"
