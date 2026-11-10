@@ -131,10 +131,14 @@ export const APP_ROUTES: RouteEntry[] = [
       'catalogue', 'all government services', 'browse services', 'available services'
     ],
     aliasesHi: [
-      'सभी सेवाएं', 'सेवाएं', 'सेवा सूची', 'सरकारी सेवाएं', 'विभाग और सेवाएं', 'नागरिक सेवाएं'
+      'सभी सेवाएं', 'सेवाएं', 'सेवा सूची', 'सरकारी सेवाएं', 'विभाग और सेवाएं', 'नागरिक सेवाएं',
+      'लिस्ट आफ सर्विसेज', 'लिस्ट ऑफ सर्विसेज', 'लिस्ट ऑफ सर्विस', 'लिस्ट आफ सर्विस',
+      'सर्विसेज लिस्ट', 'सर्विस लिस्ट', 'सेवाओं की सूची', 'सर्विसेज', 'सर्विस', 'लिस्ट',
+      'सभी सरकारी सेवाएं', 'नागरिक सेवा सूची'
     ],
     aliasesHinglish: [
-      'all services', 'sari sevayein', 'services list', 'services directory', 'sevayein dikhao'
+      'all services', 'sari sevayein', 'services list', 'services directory', 'sevayein dikhao',
+      'list of services', 'services catalogue', 'service list'
     ],
     descriptionEn: 'Categorized directory of 1,159 citizen services and welfare schemes.',
     descriptionHi: '1,159 से अधिक नागरिक सेवाओं और कल्याणकारी योजनाओं की सूची।',
@@ -372,11 +376,14 @@ export class RouteRegistry {
       };
     }
 
-    // 2. Strip conversational navigation filler phrases
+    // 2. Strip conversational navigation filler phrases (English, Hinglish & Devanagari Hindi)
     const stripped = lower
       .replace(/^(please\s+)?(i\s+want\s+to\s+(go\s+to|open|see|visit|apply\s+for|view)|take\s+me\s+to(\s+the)?|go\s+to(\s+the)?|go\s+|open(\s+the)?|navigate\s+to(\s+the)?|show\s+me(\s+the)?|show(\s+the)?|view(\s+the)?|apply\s+for(\s+the)?|search\s+(for\s+)?)\s+/i, '')
       .replace(/^(mujhe\s+)?(par\s+le\s+chalo|pe\s+le\s+chalo|kholo|par\s+jao|pe\s+jao|dikhao|le\s+chalo)\s+/i, '')
+      .replace(/^(कृपया\s+)?(मुझे\s+)?(हमे\s+)?(हमको\s+)?(मैं\s+)?/i, '')
       .replace(/\s+(page|portal|screen|par\s+le\s+chalo|pe\s+le\s+chalo|kholo|par\s+jao|pe\s+jao|dikhao|le\s+chalo|chahiye|karna\s+hai|karein|karo|par\s+jana\s+hai|pe\s+jana\s+hai)$/i, '')
+      .replace(/\s*(के\s+|पर\s+|पे\s+)?(पेज|पृष्ठ)?\s*(पर\s+ले\s+चलो|पर\s+जाओ|पे\s+जाओ|में\s+जाओ|पर\s+जाना\s+है|पे\s+जाना\s+है|में\s+जाना\s+है|जाना\s+है|जाओ|खोलो|खोलें|खोलिए|दिखाओ|दिखाइए|चाहिए)$/i, '')
+      .replace(/\s*(के\s+)?(पेज|पृष्ठ)$/i, '')
       .trim();
 
     // 3. Exact alias and title matching

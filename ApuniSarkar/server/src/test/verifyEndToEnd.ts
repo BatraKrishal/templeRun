@@ -524,6 +524,37 @@ async function runEndToEndVerification() {
       'Shorthand query "go registration in class D" navigates to Registration in Class D',
       data2
     );
+
+    // 24. Hindi Conversational Navigation Intent Resolution
+    const res3 = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'मुझे लिस्ट आफ सर्विसेज के पेज पर जाना है',
+        currentRoute: '/services/panchayati-raj/pariwar-register',
+      }),
+    });
+    const data3: any = await res3.json();
+    assert(
+      data3.intent === 'NAVIGATE' && data3.targetRoute === '/all-services',
+      'Hindi query "मुझे लिस्ट आफ सर्विसेज के पेज पर जाना है" on Pariwar Register navigates to /all-services',
+      data3
+    );
+
+    const res4 = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'मुझे आय प्रमाण पत्र के पेज पर जाना है',
+        currentRoute: '/all-services',
+      }),
+    });
+    const data4: any = await res4.json();
+    assert(
+      data4.intent === 'NAVIGATE' && data4.targetRoute === '/services/revenue/income-certificate',
+      'Hindi query "मुझे आय प्रमाण पत्र के पेज पर जाना है" navigates to Income Certificate',
+      data4
+    );
   } catch (err: any) {
     assert(false, 'Catalog voice navigation test failed', err.message);
   }

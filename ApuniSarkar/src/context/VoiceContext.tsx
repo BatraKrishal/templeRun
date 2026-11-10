@@ -491,14 +491,49 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       lower.startsWith('search ') ||
       lower.startsWith('apply for ') ||
       lower.startsWith('wapas ') ||
+      lower.startsWith('mujhe ') ||
+      lower.startsWith('kripya ') ||
+      lower.startsWith('hume ') ||
+      lower.startsWith('humko ') ||
+      lower.startsWith('main ') ||
+      lower.startsWith('कृपया ') ||
+      lower.startsWith('मुझे ') ||
+      lower.startsWith('हमे ') ||
+      lower.startsWith('हमको ') ||
+      lower.startsWith('मैं ') ||
       lower.endsWith(' kholo') ||
       lower.endsWith(' jao') ||
       lower.endsWith(' dikhao') ||
       lower.endsWith(' le chalo') ||
       lower.endsWith(' jana hai') ||
+      lower.endsWith(' chahiye') ||
+      lower.endsWith(' kholein') ||
+      lower.endsWith(' dikhaiye') ||
+      lower.endsWith(' खोलो') ||
+      lower.endsWith(' खोलें') ||
+      lower.endsWith(' खोलिए') ||
+      lower.endsWith(' जाओ') ||
+      lower.endsWith(' दिखाओ') ||
+      lower.endsWith(' दिखाइए') ||
+      lower.endsWith(' ले चलो') ||
+      lower.endsWith(' जाना है') ||
+      lower.endsWith(' चाहिए') ||
+      lower.includes(' par jana hai') ||
+      lower.includes(' ke page par') ||
+      lower.includes(' ke page') ||
+      lower.includes(' के पेज पर') ||
+      lower.includes(' के पेज') ||
+      lower.includes(' पेज पर') ||
+      lower.includes(' पेज खोलो') ||
+      lower.includes(' पृष्ठ पर') ||
+      lower.includes(' पृष्ठ') ||
       lower === 'back' ||
+      lower === 'वापस' ||
+      lower === 'peeche' ||
       lower === 'dashboard' ||
-      lower === 'home';
+      lower === 'डैशबोर्ड' ||
+      lower === 'home' ||
+      lower === 'होम';
 
     const shouldPrioritizeForm =
       voiceMode === 'FORM' || (voiceMode === 'AUTO' && isFormPage && !isExplicitNavigation);
@@ -744,9 +779,21 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       let finalReplyHindi = replyHindi;
       let finalReplyEnglish = replyEnglish;
 
+      const looksLikeNavigationAttempt =
+        isExplicitNavigation ||
+        lower.includes('page') ||
+        lower.includes('पेज') ||
+        lower.includes('पृष्ठ') ||
+        lower.includes('जाना') ||
+        lower.includes('खोलो') ||
+        lower.includes('खोल') ||
+        lower.includes('ले चल') ||
+        lower.includes('dikhao') ||
+        lower.includes('दिखा');
+
       if (
         isFormPage &&
-        !isExplicitNavigation &&
+        !looksLikeNavigationAttempt &&
         (!data.extractedSlots || Object.keys(data.extractedSlots).length === 0) &&
         (replyEnglish?.includes('could not find a matching page') || replyHindi?.includes('कोई पेज या सेवा नहीं मिली'))
       ) {
