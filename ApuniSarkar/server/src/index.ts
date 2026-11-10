@@ -73,7 +73,7 @@ app.post('/api/voice/speak', async (req, res) => {
  */
 app.post('/api/voice/intent', (req, res) => {
   try {
-    const { transcript, currentRoute, formContext } = req.body;
+    const { transcript, currentRoute, formContext, sessionId } = req.body;
     if (!transcript) {
       return res.status(400).json({ error: 'Transcript parameter is required' });
     }
@@ -82,6 +82,7 @@ app.post('/api/voice/intent', (req, res) => {
       transcript,
       currentRoute,
       formContext,
+      sessionId,
     });
 
     return res.json(routingResult);

@@ -11,7 +11,7 @@ export class ElevenLabsService {
     this.keyPoolManager = keyPoolManager;
     this.audioCacheService = audioCacheService;
     this.defaultModelId = process.env.ELEVENLABS_MODEL_ID || 'eleven_multilingual_v2';
-    this.defaultVoiceId = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM';
+    this.defaultVoiceId = process.env.ELEVENLABS_VOICE_ID || 'Xb7hH8MSUJpSbSDYk0k2';
   }
 
   /**

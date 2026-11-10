@@ -40,6 +40,7 @@ export interface VoiceSpeakRequest {
 
 export interface IntentRequest {
   transcript: string;
+  sessionId?: string;
   currentRoute?: string;
   formContext?: {
     formId: string;
@@ -49,7 +50,7 @@ export interface IntentRequest {
 }
 
 export interface IntentResponse {
-  intent: 'NAVIGATE' | 'FILL_FIELD' | 'READ_SUMMARY' | 'TRACK_STATUS' | 'VERIFY_CERTIFICATE' | 'EXPLAIN_ELEMENT' | 'GENERAL_QUERY';
+  intent: 'NAVIGATE' | 'FILL_FIELD' | 'READ_SUMMARY' | 'TRACK_STATUS' | 'VERIFY_CERTIFICATE' | 'EXPLAIN_ELEMENT' | 'GENERAL_QUERY' | 'CONFIRM_SUBMIT' | 'FORM_SUBMITTED';
   status?: 'SUCCESS' | 'FAILED' | 'AMBIGUOUS' | 'NOT_FOUND' | 'NEEDS_CONFIRMATION';
   detectedLanguage?: 'hi' | 'hinglish' | 'en';
   targetRoute?: string;
@@ -59,6 +60,13 @@ export interface IntentResponse {
   spokenResponseEnglish: string;
   confidence: number;
   suggestedAction?: string;
+  nextFieldPrompt?: string;
+  activeFieldId?: string;
+  isConfirmationPending?: boolean;
+  isFormCompleted?: boolean;
+  isFormSubmitted?: boolean;
+  submissionId?: string;
+  shouldAutoListen?: boolean;
 }
 
 export interface ServiceRecord {

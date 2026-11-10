@@ -8,23 +8,34 @@ import { CertificateViewer } from '../../components/certificates/CertificateView
 
 export const DomicileCertificatePage: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { language } = useAccessibility();
-  const { registerSlotListener, speakText } = useVoice();
+  const { registerSlotListener, speakText, isConfirmationPending, submissionId, updateFormSlot } = useVoice();
 
   const [formData, setFormData] = useState({
     applicant_name: '',
     father_husband_name: '',
     gender: 'MALE',
     mobile_number: '',
-    district: 'Pauri Garhwal',
-    tehsil: 'Kotdwar',
-    ancestral_village: 'Kandolia',
-    years_living_in_uk: '25',
+    district: '',
+    tehsil: '',
+    ancestral_village: '',
+    years_living_in_uk: '',
     reason_for_domicile: 'EMPLOYMENT',
   });
 
   const [voiceFilledFields, setVoiceFilledFields] = useState<Record<string, boolean>>({});
   const [isSignOffOpen, setIsSignOffOpen] = useState(false);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isConfirmationPending) setIsSignOffOpen(true);
+  }, [isConfirmationPending]);
+
+  useEffect(() => {
+    if (submissionId) {
+      setSubmittedId(submissionId);
+      setIsSignOffOpen(false);
+    }
+  }, [submissionId]);
 
   useEffect(() => {
     const unsub = registerSlotListener((slots) => {
@@ -45,6 +56,7 @@ export const DomicileCertificatePage: React.FC<{ onNavigate: (route: string) => 
 
   const handleFieldChange = (field: string, val: any) => {
     setFormData((prev) => ({ ...prev, [field]: val }));
+    updateFormSlot(field, val);
   };
 
   const handleFinalSubmit = () => {

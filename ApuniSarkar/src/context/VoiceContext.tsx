@@ -21,6 +21,16 @@ interface VoiceContextType extends VoiceState {
   startFieldDictation: (fieldId: string, promptText?: string) => void;
   recognitionLang: 'en-IN' | 'hi-IN';
   setRecognitionLang: (lang: 'en-IN' | 'hi-IN') => void;
+  activeFieldId?: string;
+  setActiveFieldId?: (fieldId?: string) => void;
+  isConfirmationPending?: boolean;
+  submissionId?: string;
+  formSlots?: Record<string, any>;
+  updateFormSlot?: (key: string, value: any) => void;
+  clearConversation?: () => void;
+  sessionId?: string;
+  setHandsFreeMode?: (enabled: boolean) => void;
+  toggleHandsFree?: () => void;
 }
 
 const VoiceContext = createContext<VoiceContextType | undefined>(undefined);
@@ -29,6 +39,17 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const { language: uiLanguage } = useAccessibility();
   const [voiceMode, setVoiceMode] = useState<'AUTO' | 'FORM' | 'NAVIGATION'>('AUTO');
   const [activeFocusedField, setActiveFocusedField] = useState<string | null>(null);
+  const [activeFieldId, setActiveFieldId] = useState<string | undefined>(undefined);
+  const [formSlots, setFormSlots] = useState<Record<string, any>>({});
+  const [sessionId] = useState<string>(() => `uk_ses_${Date.now()}`);
+  const updateFormSlot = (key: string, value: any) => {
+    setFormSlots((prev) => ({ ...prev, [key]: value }));
+  };
+  const clearConversation = () => {
+    setFormSlots({});
+  };
+  const setHandsFreeMode = (_enabled: boolean) => {};
+  const toggleHandsFree = () => {};
   const [recognitionLang, setRecognitionLangState] = useState<'en-IN' | 'hi-IN'>(
     uiLanguage === 'hi' ? 'hi-IN' : 'en-IN'
   );
@@ -810,6 +831,14 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setNavigationHandler,
         recognitionLang,
         setRecognitionLang,
+        activeFieldId,
+        setActiveFieldId,
+        formSlots,
+        updateFormSlot,
+        clearConversation,
+        sessionId,
+        setHandsFreeMode,
+        toggleHandsFree,
       }}
     >
       {children}
