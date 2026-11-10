@@ -9,15 +9,30 @@ export interface AccessibilitySettings {
   narratorActive: boolean; // Hover/focus spoken screen reader ("Vachak")
 }
 
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'jarvis';
+  text: string;
+  time: string;
+  intent?: string;
+  slots?: Record<string, any>;
+}
+
 export interface VoiceState {
   isListening: boolean;
   isProcessing: boolean;
   isSpeaking: boolean;
+  handsFreeMode: boolean;
+  dialogueState: 'IDLE' | 'LISTENING' | 'THINKING' | 'SPEAKING';
   transcript: string;
   assistantReplyHindi: string;
   assistantReplyEnglish: string;
   activeIntent?: string;
   lastTargetRoute?: string;
+  activeFieldId?: string;
+  isConfirmationPending?: boolean;
+  submissionId?: string;
+  conversationHistory: ChatMessage[];
   error?: string;
 }
 

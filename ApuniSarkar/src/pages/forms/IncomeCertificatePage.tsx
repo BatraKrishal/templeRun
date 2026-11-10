@@ -8,7 +8,15 @@ import { CertificateViewer } from '../../components/certificates/CertificateView
 
 export const IncomeCertificatePage: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { language, narrateElement, saralMode } = useAccessibility();
-  const { registerSlotListener, speakText } = useVoice();
+  const {
+    registerSlotListener,
+    speakText,
+    isConfirmationPending,
+    submissionId,
+    activeFieldId,
+    setActiveFieldId,
+    updateFormSlot,
+  } = useVoice();
 
   const [formData, setFormData] = useState({
     applicant_name: '',
@@ -16,11 +24,11 @@ export const IncomeCertificatePage: React.FC<{ onNavigate: (route: string) => vo
     gender: 'MALE',
     mobile_number: '',
     aadhaar_last_four: '',
-    district: 'Dehradun',
-    tehsil: 'Dehradun Sadar',
-    patwari_circle: 'Raipur',
+    district: '',
+    tehsil: '',
+    patwari_circle: '',
     village_ward: '',
-    annual_income: 60000,
+    annual_income: '',
     income_source: 'AGRICULTURE',
     purpose: 'SCHOLARSHIP',
   });
@@ -28,6 +36,20 @@ export const IncomeCertificatePage: React.FC<{ onNavigate: (route: string) => vo
   const [voiceFilledFields, setVoiceFilledFields] = useState<Record<string, boolean>>({});
   const [isSignOffOpen, setIsSignOffOpen] = useState(false);
   const [submittedApplicationId, setSubmittedApplicationId] = useState<string | null>(null);
+
+  // Sync confirmation and submission states from VoiceContext
+  useEffect(() => {
+    if (isConfirmationPending) {
+      setIsSignOffOpen(true);
+    }
+  }, [isConfirmationPending]);
+
+  useEffect(() => {
+    if (submissionId) {
+      setSubmittedApplicationId(submissionId);
+      setIsSignOffOpen(false);
+    }
+  }, [submissionId]);
 
   // Register Voice Copilot slot filling listener
   useEffect(() => {
@@ -58,6 +80,7 @@ export const IncomeCertificatePage: React.FC<{ onNavigate: (route: string) => vo
 
   const handleFieldChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    updateFormSlot(field, value);
   };
 
   const handleFinalSubmit = () => {

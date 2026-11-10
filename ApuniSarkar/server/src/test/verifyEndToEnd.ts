@@ -49,7 +49,7 @@ async function runEndToEndVerification() {
     const res = await fetch('http://localhost:5000/api/voice/intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transcript: 'मुझे अपनी आय का प्रमाण पत्र बनवाना है' }),
+      body: JSON.stringify({ transcript: 'मुझे अपनी आय का प्रमाण पत्र बनवाना है', sessionId: 'test_session_income' }),
     });
     const intentData = await res.json();
     assert(
@@ -66,7 +66,7 @@ async function runEndToEndVerification() {
     const res = await fetch('http://localhost:5000/api/voice/intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transcript: 'स्थायी निवास प्रमाण पत्र फॉर्म खोलो' }),
+      body: JSON.stringify({ transcript: 'स्थायी निवास प्रमाण पत्र फॉर्म खोलो', sessionId: 'test_session_domicile' }),
     });
     const intentData = await res.json();
     assert(
@@ -86,6 +86,7 @@ async function runEndToEndVerification() {
       body: JSON.stringify({
         transcript: 'मेरा नाम कुलदीप सिंह नेगी है, पिता जी का नाम खुशाल सिंह, और कमाई साठ हज़ार है',
         currentRoute: '/services/revenue/income-certificate',
+        sessionId: 'test_session_slots',
       }),
     });
     const data = await res.json();
@@ -106,7 +107,7 @@ async function runEndToEndVerification() {
     const res = await fetch('http://localhost:5000/api/voice/intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transcript: 'आवेदन ट्रैक करें UK-REV-2026-9812' }),
+      body: JSON.stringify({ transcript: 'आवेदन ट्रैक करें UK-REV-2026-9812', sessionId: 'test_session_track' }),
     });
     const data = await res.json();
     assert(

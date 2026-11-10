@@ -1,195 +1,220 @@
-import React, { useState } from 'react';
-import { Mic, MicOff, Volume2, Sparkles, ChevronDown, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Mic, MicOff, Volume2, Radio, Globe } from 'lucide-react';
 import { useVoice } from '../../context/VoiceContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { ConversationalVoiceOrb } from './ConversationalVoiceOrb';
 
 export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
-  const { language, narrateElement } = useAccessibility();
+  const { language, setLanguage } = useAccessibility();
   const {
+    dialogueState,
     isListening,
-    isProcessing,
     isSpeaking,
-    transcript,
+    isProcessing,
+    handsFreeMode,
+    toggleListening,
+    startListening,
+    stopListening,
+    stopSpeaking,
     assistantReplyHindi,
     assistantReplyEnglish,
-    activeIntent,
-    lastTargetRoute,
-    toggleListening,
+    transcript,
     executeVoiceCommand,
-    stopSpeaking,
   } = useVoice();
 
-  const [expanded, setExpanded] = useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [showSubtitle, setShowSubtitle] = useState(true);
 
-  const quickPrompts = [
-    { labelHindi: 'आय प्रमाण पत्र', labelEn: 'Income Certificate', query: 'मुझे आय प्रमाण पत्र बनवाना है' },
-    { labelHindi: 'मूल निवास', labelEn: 'Domicile Form', query: 'स्थायी निवास प्रमाण पत्र खोलो' },
-    { labelHindi: 'परिवार रजिस्टर', labelEn: 'Family Register', query: 'परिवार रजिस्टर की नकल' },
-    { labelHindi: 'ट्रैक आवेदन', labelEn: 'Track Status', query: 'आवेदन ट्रैक करें UK-REV-2026-9812' },
-    { labelHindi: 'हेल्पलाइन 1905', labelEn: 'Helpline 1905', query: 'टोल फ्री हेल्पलाइन नंबर क्या है' },
-  ];
+  // Keyboard shortcut: Ctrl + Space to trigger conversational listening
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.code === 'Space' || e.key === 'j' || e.key === 'J')) {
+        e.preventDefault();
+        toggleListening();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleListening]);
 
-  if (!expanded) {
-    return (
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          onClick={() => setExpanded(true)}
-          className="flex items-center gap-3 rounded-full bg-navbar px-4 py-2.5 text-white shadow-2xl hover:bg-navbar/95 transition-all border border-white/20 hover:scale-105 select-none cursor-pointer"
-          title="Open VaaniSetu Voice Assistant"
-        >
-          <div className="relative flex items-center justify-center size-8 rounded-full bg-primary text-white shadow-inner">
-            <Mic className="size-4 text-white" />
-            {isSpeaking && (
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-              </span>
-            )}
-          </div>
-          <div className="text-left pr-1">
-            <div className="text-xs font-bold leading-tight flex items-center gap-1.5">
-              <span>VaaniSetu (वाणी-सेतु)</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-normal">
-                ElevenLabs
-              </span>
-            </div>
-            <div className="text-[10px] text-white/70">AI Voice Assistant & Narrator</div>
-          </div>
-        </button>
-      </div>
-    );
-  }
+  const activeReply = language === 'hi' ? assistantReplyHindi : assistantReplyEnglish;
 
   return (
-    <aside
-      aria-label="VaaniSetu Voice Assistant Dock"
-      className="fixed bottom-6 right-6 z-50 max-w-md w-full sm:w-[400px] transition-all duration-300 pointer-events-auto"
-    >
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-gray-200/90 shadow-2xl overflow-hidden animate-scale-in">
-        {/* Header Bar */}
-        <div className="bg-navbar text-white px-4 py-3 flex items-center justify-between select-none">
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex items-center justify-center size-8 rounded-full bg-primary text-white">
-              <Sparkles className="size-4 text-amber-300" />
-              {isSpeaking && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+    <>
+      {/* 1. Ultra-Minimal Floating Conversational Orb (Bottom-Right) */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 pointer-events-auto select-none">
+        {/* Floating Minimal Spoken Subtitle Pill (Clean 1-line feedback) */}
+        {(isListening || isSpeaking || isProcessing) && showSubtitle && (
+          <div className="max-w-xs sm:max-w-sm rounded-2xl bg-white/95 backdrop-blur-md px-4 py-2.5 text-xs text-slate-800 shadow-xl border border-sky-100 animate-fade-in flex items-start gap-2.5">
+            <span
+              className={`size-2 rounded-full shrink-0 mt-1 ${
+                isListening
+                  ? 'bg-sky-500 animate-ping'
+                  : isSpeaking
+                  ? 'bg-blue-600 animate-pulse'
+                  : 'bg-amber-400'
+              }`}
+            />
+            <div className="flex-1 leading-snug">
+              {isListening ? (
+                <span className="text-sky-700 font-semibold">
+                  {language === 'hi' ? 'सुन रहा हूँ... बोलिए' : 'Listening... Speak now'}
                 </span>
+              ) : isProcessing ? (
+                <span className="text-slate-500">
+                  {language === 'hi' ? 'विश्लेषण हो रहा है...' : 'Processing...'}
+                </span>
+              ) : (
+                <span>{activeReply}</span>
               )}
             </div>
-            <div>
-              <div className="text-xs font-bold leading-tight flex items-center gap-1.5">
-                <span>VaaniSetu (वाणी-सेतु)</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-normal">
-                  ElevenLabs v2.5
-                </span>
-              </div>
-              <div className="text-[10px] text-white/70">
-                {isListening
-                  ? 'सुन रहा हूँ... (Listening)'
-                  : isSpeaking
-                  ? 'बोल रहा हूँ... (Speaking)'
-                  : isProcessing
-                  ? 'विश्लेषण कर रहा हूँ... (Processing)'
-                  : 'सहायता के लिए बोलें या क्लिक करें'}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            {isSpeaking && (
-              <button
-                onClick={stopSpeaking}
-                className="p-1 rounded hover:bg-white/10 text-white/90 text-xs"
-                title="Stop Audio"
-              >
-                <Volume2 className="size-4 text-amber-300 animate-pulse" />
-              </button>
-            )}
             <button
-              onClick={() => setExpanded(false)}
-              className="p-1 rounded hover:bg-white/10 text-white/80"
-              aria-label="Collapse dock"
+              onClick={() => setShowSubtitle(false)}
+              className="text-slate-400 hover:text-slate-600 p-0.5"
+              title="Dismiss"
             >
-              <ChevronDown className="size-4" />
+              <X className="size-3" />
             </button>
           </div>
-        </div>
+        )}
 
-        {/* Expanded Body */}
-        <div className="p-3.5 space-y-3 text-xs">
-          {/* Live Waveform / Mic Visualizer */}
-          <div className="flex items-center justify-between gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-            {/* Mic Toggle Button */}
-            <button
-              type="button"
-              onClick={toggleListening}
-              className={`flex items-center justify-center size-12 rounded-full transition-all shrink-0 shadow-md ${
-                isListening
-                  ? 'bg-red-600 text-white scale-110 ring-4 ring-red-200 animate-pulse'
-                  : isSpeaking
-                  ? 'bg-amber-500 text-white animate-bounce'
-                  : 'bg-primary text-white hover:bg-primary/90'
-              }`}
-              title={isListening ? 'माइक बंद करें' : 'माइक चालू करें (Speak)'}
-            >
-              {isListening ? <Mic className="size-6 animate-pulse" /> : <Mic className="size-5" />}
-            </button>
+        {/* Minimal Orb Trigger Button */}
+        <div className="flex items-center gap-2">
+          {/* Subtle label pill */}
+          <button
+            onClick={() => setModalOpen(true)}
+            className="hidden sm:flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-slate-700 shadow-md border border-slate-200 hover:bg-white transition-all cursor-pointer"
+            title="Open Conversational Voice Modal"
+          >
+            <span className="size-2 rounded-full bg-sky-500 animate-pulse" />
+            <span>{language === 'hi' ? 'आवाज सहायक' : 'Voice Agent'}</span>
+          </button>
 
-            {/* Status / Transcript Wave */}
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-ink-700">
-                <span>{isListening ? '🔴 नागरिक आवाज रिकॉर्ड हो रही है...' : '🎙️ अपनी भाषा में बोलें:'}</span>
-                <span className="text-[10px] text-gray-500">हिंदी / गढ़वाली / EN</span>
-              </div>
-              <p className="mt-1 text-xs text-ink-900 font-medium truncate bg-white px-2 py-1 rounded border border-gray-200 min-h-[26px]">
-                {transcript || (
-                  <span className="text-gray-400 italic">उदा: "मुझे आय प्रमाण पत्र का फॉर्म भरना है"</span>
-                )}
-              </p>
-            </div>
-          </div>
-
-          {/* Assistant Voice Reply Bubble */}
-          {(assistantReplyHindi || assistantReplyEnglish) && (
-            <div className="bg-orange-50/70 border border-orange-200 p-2.5 rounded-xl space-y-1 animate-fade-in">
-              <div className="flex items-center justify-between text-[10px] font-bold text-primary uppercase">
-                <span>उत्तराखंड ई-सहायक उत्तर (ElevenLabs Voice):</span>
-                {lastTargetRoute && (
-                  <button
-                    onClick={() => onNavigate(lastTargetRoute)}
-                    className="text-primary underline font-semibold flex items-center gap-0.5 hover:text-primary/80"
-                  >
-                    <span>पेज खोलें</span> →
-                  </button>
-                )}
-              </div>
-              <p className="text-xs text-ink-900 leading-snug font-medium">
-                {language === 'hi' ? assistantReplyHindi : assistantReplyEnglish || assistantReplyHindi}
-              </p>
-            </div>
-          )}
-
-          {/* Quick Voice Chips */}
-          <div>
-            <div className="text-[10px] font-semibold text-gray-500 mb-1.5 uppercase">
-              त्वरित सुझाव (Quick Voice Commands):
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {quickPrompts.map((p, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => executeVoiceCommand(p.query)}
-                  className="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-orange-100 hover:text-primary text-[11px] font-medium text-ink-700 transition-colors border border-gray-200"
-                >
-                  {language === 'hi' ? p.labelHindi : p.labelEn}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* The ElevenLabs-Style Fluid Blue Orb */}
+          <ConversationalVoiceOrb
+            dialogueState={dialogueState}
+            isListening={isListening}
+            isSpeaking={isSpeaking}
+            onClick={toggleListening}
+            size="md"
+          />
         </div>
       </div>
-    </aside>
+
+      {/* 2. Focused Minimal Voice Modal (1:1 Exact Match to Uploaded Screenshot) */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in pointer-events-auto">
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-7 text-left shadow-2xl border border-slate-100 animate-scale-in flex flex-col items-center">
+            {/* Top Close Button */}
+            <button
+              onClick={() => setModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+              title="Close"
+            >
+              <X className="size-5" />
+            </button>
+
+            {/* Title & Subtitle */}
+            <div className="w-full text-left mb-6 pr-6">
+              <h2 className="text-xl font-bold text-slate-900 leading-tight">
+                {language === 'hi' ? 'वाणी-सेतु आवाज सहायक' : 'VaaniSetu Voice Agent'}
+              </h2>
+              <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">
+                {language === 'hi'
+                  ? 'उत्तराखंड अपनी सरकार का सहज और प्राकृतिक बातचीत सहायक। किसी भी सेवा के लिए सिर्फ बोलिए।'
+                  : 'Hands-free conversational agent for Apuni Sarkar. Speak naturally to navigate or fill forms.'}
+              </p>
+            </div>
+
+            {/* The Signature Large Fluid Blue Watercolor Orb (Matching Screenshot) */}
+            <div className="my-6 flex flex-col items-center justify-center">
+              <ConversationalVoiceOrb
+                dialogueState={dialogueState}
+                isListening={isListening}
+                isSpeaking={isSpeaking}
+                onClick={toggleListening}
+                size="lg"
+              />
+
+              {/* Minimal Telemetry Below Orb */}
+              <div className="mt-6 flex items-center justify-between w-64 text-xs text-slate-500 font-medium">
+                <div className="text-center">
+                  <div className="text-[11px] text-slate-400">
+                    {language === 'hi' ? 'स्थिति' : 'Status'}
+                  </div>
+                  <div className="font-semibold text-slate-700">
+                    {isListening
+                      ? 'Listening'
+                      : isSpeaking
+                      ? 'Speaking'
+                      : isProcessing
+                      ? 'Thinking'
+                      : 'Standby'}
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="text-[11px] text-slate-400">
+                    {language === 'hi' ? 'माध्यम' : 'Engine'}
+                  </div>
+                  <div className="font-semibold text-sky-600">ElevenLabs</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Speech Subtitle */}
+            <div className="w-full min-h-[44px] flex items-center justify-center text-center px-2 mb-4">
+              <p className="text-xs text-slate-600 italic">
+                {isListening
+                  ? language === 'hi'
+                    ? 'सुन रहा हूँ... बोलिए'
+                    : 'Listening... Please speak'
+                  : activeReply}
+              </p>
+            </div>
+
+            {/* Main Action Button (Black Pill, Exact match to "Create new" in screenshot) */}
+            <button
+              onClick={toggleListening}
+              className={`w-full py-3.5 rounded-2xl text-sm font-semibold transition-all cursor-pointer shadow-md flex items-center justify-center gap-2 ${
+                isListening
+                  ? 'bg-rose-600 text-white hover:bg-rose-700 shadow-rose-200'
+                  : isSpeaking
+                  ? 'bg-amber-600 text-white hover:bg-amber-700 shadow-amber-200'
+                  : 'bg-black text-white hover:bg-slate-900'
+              }`}
+            >
+              {isListening ? (
+                <>
+                  <MicOff className="size-4" />
+                  <span>{language === 'hi' ? 'बोलना रोकें' : 'Stop Listening'}</span>
+                </>
+              ) : isSpeaking ? (
+                <>
+                  <Volume2 className="size-4" />
+                  <span>{language === 'hi' ? 'आवाज बंद करें' : 'Mute Speech'}</span>
+                </>
+              ) : (
+                <>
+                  <Mic className="size-4" />
+                  <span>{language === 'hi' ? 'बातचीत शुरू करें' : 'Start Speaking'}</span>
+                </>
+              )}
+            </button>
+
+            {/* Language toggle at bottom */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
+              <Globe className="size-3.5" />
+              <button
+                onClick={() => setLanguage(language === 'hi' ? 'en' : 'hi')}
+                className="hover:text-slate-900 underline font-medium"
+              >
+                {language === 'hi' ? 'Switch to English' : 'हिन्दी में बात करें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

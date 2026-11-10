@@ -24,7 +24,7 @@ export class SlotNormalizerService {
   /**
    * Normalizes spoken input text into structured form slot values.
    */
-  public normalizeSlots(spokenText: string): Record<string, any> {
+  public normalizeSlots(spokenText: string, activeFieldId?: string): Record<string, any> {
     const slots: Record<string, any> = {};
     const lower = spokenText.toLowerCase().trim();
 
@@ -52,6 +52,10 @@ export class SlotNormalizerService {
       else if (lower.includes('चमोली') || lower.includes('chamoli')) slots.district = 'Chamoli';
       else if (lower.includes('उत्तरकाशी') || lower.includes('uttarkashi')) slots.district = 'Uttarkashi';
       else if (lower.includes('पिथौरागढ़') || lower.includes('pithoragarh')) slots.district = 'Pithoragarh';
+      else if (lower.includes('रुद्रप्रयाग') || lower.includes('rudraprayag')) slots.district = 'Rudraprayag';
+      else if (lower.includes('चंपावत') || lower.includes('champawat')) slots.district = 'Champawat';
+      else if (lower.includes('बागेश्वर') || lower.includes('bageshwar')) slots.district = 'Bageshwar';
+      else if (lower.includes('उधम सिंह') || lower.includes('udham singh')) slots.district = 'Udham Singh Nagar';
     }
 
     // 3. Detect Applicant Name patterns
@@ -61,6 +65,8 @@ export class SlotNormalizerService {
     if (nameMatch && nameMatch[1]) {
       const rawName = nameMatch[1].trim();
       slots.applicant_name = this.cleanName(rawName);
+    } else if (activeFieldId === 'applicant_name' && !slots.annual_income && !slots.district) {
+      slots.applicant_name = this.cleanName(spokenText);
     }
 
     // 4. Detect Father/Husband Name patterns
@@ -70,15 +76,39 @@ export class SlotNormalizerService {
     if (fatherMatch && fatherMatch[1]) {
       const rawFather = fatherMatch[1].trim();
       slots.father_husband_name = this.cleanName(rawFather);
+    } else if (activeFieldId === 'father_husband_name' && !slots.applicant_name && !slots.annual_income && !slots.district) {
+      slots.father_husband_name = this.cleanName(spokenText);
     }
 
-    // 5. Detect Tracking ID (UK-REV-XXXX-XXXX or 16-digit ID)
-    const trackingMatch = spokenText.match(/UK-[A-Z0-9]+-[0-9]+-[0-9]+/i) || spokenText.match(/\b\d{16}\b/);
+    // 5. Detect Income Source (खेती / मजदूरी / नौकरी / व्यापार / पेंशन)
+    if (lower.includes('कृषि') || lower.includes('खेती') || lower.includes('agriculture') || lower.includes('farming')) {
+      slots.income_source = 'AGRICULTURE';
+    } else if (lower.includes('मजदूरी') || lower.includes('labor') || lower.includes('labour') || lower.includes('wage')) {
+      slots.income_source = 'LABOR';
+    } else if (lower.includes('व्यापार') || lower.includes('business') || lower.includes('दुकान')) {
+      slots.income_source = 'BUSINESS';
+    } else if (lower.includes('नौकरी') || lower.includes('service') || lower.includes('job') || lower.includes('वेतन')) {
+      slots.income_source = 'SALARY';
+    } else if (lower.includes('पेंशन') || lower.includes('pension')) {
+      slots.income_source = 'PENSION';
+    }
+
+    // 6. Detect Purpose (छात्रवृत्ति / नौकरी / राशन कार्ड / सरकारी योजना)
+    if (lower.includes('छात्रवृत्ति') || lower.includes('scholarship') || lower.includes('पढ़ाई')) {
+      slots.purpose = 'SCHOLARSHIP';
+    } else if (lower.includes('नौकरी') || lower.includes('employment') || lower.includes('भर्ती')) {
+      slots.purpose = 'EMPLOYMENT';
+    } else if (lower.includes('राशन') || lower.includes('ration') || lower.includes('bpl')) {
+      slots.purpose = 'RATION_CARD';
+    }
+
+    // 7. Detect Tracking ID (UK-REV-XXXX-XXXX or 16-digit ID)
+    const trackingMatch = spokenText.match(/UK-[A-Z0-9]+-[0-9]+-[0-9]+/i) || spokenText.match(/\b\d{16}\b/) || spokenText.match(/UK\d{2}[A-Z]{2}\d{12}/i);
     if (trackingMatch) {
       slots.tracking_id = trackingMatch[0].toUpperCase();
     }
 
-    // 6. Detect Mobile Number
+    // 8. Detect Mobile Number
     const phoneMatch = spokenText.match(/(?:मोबाइल|phone|mobile|number)?\s*([6-9]\d{9})/);
     if (phoneMatch) {
       slots.mobile_number = phoneMatch[1];
@@ -90,6 +120,7 @@ export class SlotNormalizerService {
   private cleanName(name: string): string {
     return name
       .replace(/^(श्री|श्रीमती|shri|mr|mrs|dr)\s+/i, '')
+      .replace(/(?:है|hai|था|tha|ji|जी)$/i, '')
       .replace(/\s+/g, ' ')
       .trim();
   }
@@ -98,21 +129,31 @@ export class SlotNormalizerService {
     // Direct numeric match e.g. "60000" or "60,000"
     const numMatch = text.match(/(?:income|आय|कमाई|रुपये|rs\.?|₹)?\s*([0-9]{1,2},?[0-9]{2,3},?[0-9]{3})/i);
     if (numMatch) {
-      return parseInt(numMatch[1].replace(/,/g, ''), 10);
+      const clean = numMatch[1].replace(/,/g, '');
+      const parsed = parseInt(clean, 10);
+      if (!isNaN(parsed) && parsed > 0) return parsed;
     }
 
-    // Hindi currency phrase detection e.g. "साठ हज़ार" or "एक लाख"
-    if (text.includes('साठ हज़ार') || text.includes('साठ हजार')) return 60000;
-    if (text.includes('पचास हज़ार') || text.includes('पचास हजार')) return 50000;
-    if (text.includes('सत्तर हज़ार') || text.includes('सत्तर हजार')) return 70000;
-    if (text.includes('अस्सी हज़ार') || text.includes('अस्सी हजार')) return 80000;
-    if (text.includes('एक लाख')) return 100000;
-    if (text.includes('डेढ़ लाख')) return 150000;
-    if (text.includes('दो लाख')) return 200000;
-    if (text.includes('तीस हज़ार')) return 30000;
-    if (text.includes('चालीस हज़ार')) return 40000;
+    // Conversational Hindi Number Word Matching: e.g. "साठ हज़ार", "अस्सी हजार", "एक लाख"
+    let total = 0;
+    let currentMultiplier = 0;
 
-    return null;
+    const words = text.split(/[\s,]+/);
+    for (const w of words) {
+      const val = SlotNormalizerService.HINDI_NUMBER_WORDS[w];
+      if (val !== undefined) {
+        if (val >= 1000) {
+          total += (currentMultiplier || 1) * val;
+          currentMultiplier = 0;
+        } else if (val === 100) {
+          currentMultiplier = (currentMultiplier || 1) * 100;
+        } else {
+          currentMultiplier += val;
+        }
+      }
+    }
+    total += currentMultiplier;
+
+    return total > 0 ? total : null;
   }
 }
-

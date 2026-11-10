@@ -1,58 +1,68 @@
 {
   "version": "1.2.0",
-  "activeKeyIndex": 2,
-  "lastUpdated": "2026-11-10T07:06:41.879Z",
-  "totalCharactersConsumed": 387,
-  "totalMinutesEstimated": 0.6,
-  "totalPoolCapacityChars": 30000,
+  "activeKeyIndex": 0,
+  "lastUpdated": "2026-11-10T08:59:35.580Z",
+  "totalCharactersConsumed": 653,
+  "totalMinutesEstimated": 1,
+  "totalPoolCapacityChars": 10000,
   "keys": [
     {
       "id": "key_01",
       "label": "Account 1",
-      "accountEmail": "uk.citizen.dev1@gmail.com",
-      "apiKey": "sk_free_demo_key_01",
-      "apiKeyMasked": "sk_f...y_01",
+      "accountEmail": "krishalbatra18@gmail.com",
+      "apiKey": "sk_3532cf2f6f6a1125063f0a56193aa14edfd291b6b83cb517",
+      "apiKeyMasked": "sk_3...b517",
       "characterLimit": 10000,
-      "charactersUsed": 9550,
-      "minutesEstimated": 14.8,
-      "status": "EXHAUSTED",
-      "lastUsedAt": null,
-      "exhaustedAt": "2026-11-10T06:05:46.991Z",
-      "alertSent": true,
-      "failureCount": 0
-    },
-    {
-      "id": "key_02",
-      "label": "Account 2",
-      "accountEmail": "uk.citizen.dev2@gmail.com",
-      "apiKey": "sk_free_demo_key_02",
-      "apiKeyMasked": "sk_f...y_02",
-      "characterLimit": 10000,
-      "charactersUsed": 9550,
-      "minutesEstimated": 14.8,
-      "status": "EXHAUSTED",
-      "lastUsedAt": "2026-11-10T06:06:03.678Z",
-      "exhaustedAt": "2026-11-10T06:16:39.603Z",
-      "alertSent": true,
-      "failureCount": 0
-    },
-    {
-      "id": "key_03",
-      "label": "Account 3",
-      "accountEmail": "uk.citizen.dev3@gmail.com",
-      "apiKey": "sk_free_demo_key_03",
-      "apiKeyMasked": "sk_f...y_03",
-      "characterLimit": 10000,
-      "charactersUsed": 9550,
-      "minutesEstimated": 14.8,
-      "status": "EXHAUSTED",
-      "lastUsedAt": "2026-11-10T07:06:11.113Z",
-      "exhaustedAt": "2026-11-10T07:06:41.879Z",
+      "charactersUsed": 653,
+      "minutesEstimated": 1,
+      "status": "ACTIVE",
+      "lastUsedAt": "2026-11-10T08:59:35.580Z",
+      "exhaustedAt": "2026-11-10T08:56:28.501Z",
       "alertSent": true,
       "failureCount": 0
     }
   ],
   "history": [
+    {
+      "timestamp": "2026-11-10T08:56:28.501Z",
+      "event": "QUOTA_EXHAUSTED",
+      "details": "Key key_01 (krishalbatra18@gmail.com) exhausted at 9550 chars. Switched to NONE."
+    },
+    {
+      "timestamp": "2026-11-10T08:52:26.035Z",
+      "event": "QUOTA_EXHAUSTED",
+      "details": "Key key_01 (krishalbatra18@gmail.com) exhausted at 9550 chars. Switched to NONE."
+    },
+    {
+      "timestamp": "2026-11-10T08:51:25.072Z",
+      "event": "QUOTA_EXHAUSTED",
+      "details": "Key key_01 (krishalbatra18@gmail.com) exhausted at 9550 chars. Switched to NONE."
+    },
+    {
+      "timestamp": "2026-11-10T08:51:25.018Z",
+      "event": "QUOTA_EXHAUSTED",
+      "details": "Key key_01 (krishalbatra18@gmail.com) exhausted at 9825 chars. Switched to NONE."
+    },
+    {
+      "timestamp": "2026-11-10T08:50:12.481Z",
+      "event": "QUOTA_EXHAUSTED",
+      "details": "Key key_01 (krishalbatra18@gmail.com) exhausted at 9777 chars. Switched to NONE."
+    },
+    {
+      "timestamp": "2026-11-10T08:50:12.409Z",
+      "event": "QUOTA_EXHAUSTED",
+      "details": "Key key_01 (krishalbatra18@gmail.com) exhausted at 9701 chars. Switched to NONE."
+    },
+    {
+      "timestamp": "2026-11-10T08:49:47.999Z",
+      "event": "QUOTA_EXHAUSTED",
+      "details": "Key key_01 (krishalbatra18@gmail.com) exhausted at 9625 chars. Switched to NONE."
+    },
+    {
+      "timestamp": "2026-11-10T08:28:17.292Z",
+      "event": "QUOTA_EXHAUSTED",
+      "details": "Key key_01 (krishalbatra18@gmail.com) exhausted at 9550 chars. Switched to NONE."
+    },
     {
       "timestamp": "2026-11-10T07:06:41.879Z",
       "event": "QUOTA_EXHAUSTED",

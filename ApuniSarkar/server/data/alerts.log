@@ -78,3 +78,29 @@ Please log in to ElevenLabs for account "uk.citizen.dev3@gmail.com" to verify qu
 =====================================================
 
 
+[2026-11-10T08:28:17.312Z] [CRITICAL ALERT] ApuniSarkar ElevenLabs Key Quota Reached (Account 1)
+
+=====================================================
+UTTARAKHAND APUNI SARKAR - ELEVENLABS QUOTA ALERT
+=====================================================
+Timestamp: 2026-11-10T08:28:17.312Z
+Event: ElevenLabs API Key Quota Exhaustion / Rotation
+
+Exhausted Account:
+- Key ID: key_01 (Account 1)
+- Associated Email: krishalbatra18@gmail.com
+- Characters Consumed: 9550 / 10000
+- Audio Playback Estimated: 14.8 mins
+- Status: EXHAUSTED
+
+Failover Status:
+- WARNING: NO HEALTHY KEYS REMAINING IN POOL! Falling back to Web Speech API.
+
+Pool Health:
+- Active Healthy Accounts: 0 / 1
+
+Action Recommended:
+Please log in to ElevenLabs for account "krishalbatra18@gmail.com" to verify quota or replace the key in ApuniSarkar/.env.
+=====================================================
+
+
