@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Production build outputs
+dist/
+**/dist/
+server/dist/
+**/server/dist/
+
+# Environment and sensitive keys
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Local disk audio cache and alerts
+**/server/data/audio_cache/
+server/data/audio_cache/
+**/server/data/keys_pool_state.json
+server/data/keys_pool_state.json
+*.log
+**/*.log
+
+# Operating System and Editor files
+.DS_Store
+Thumbs.db
+NUL

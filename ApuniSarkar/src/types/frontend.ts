@@ -16,8 +16,13 @@ export interface VoiceState {
   transcript: string;
   assistantReplyHindi: string;
   assistantReplyEnglish: string;
+  detectedLanguage?: 'hi' | 'hinglish' | 'en';
+  actionStatus?: 'SUCCESS' | 'FAILED' | 'AMBIGUOUS' | 'NOT_FOUND' | 'NEEDS_CONFIRMATION';
   activeIntent?: string;
   lastTargetRoute?: string;
+  voiceMode?: 'AUTO' | 'FORM' | 'NAVIGATION';
+  activeFocusedField?: string | null;
+  recognitionLang?: 'en-IN' | 'hi-IN';
   error?: string;
 }
 

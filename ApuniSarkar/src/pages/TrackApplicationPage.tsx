@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, FileText, X, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useVoice } from '../context/VoiceContext';
 
 export const TrackApplicationPage: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { language, narrateElement } = useAccessibility();
-  const { speakText } = useVoice();
+  const { speakText, registerSlotListener } = useVoice();
   const [appId, setAppId] = useState('');
   const [searched, setSearched] = useState(false);
   const [result, setResult] = useState<any>(null);
+
+  useEffect(() => {
+    const unsub = registerSlotListener((slots) => {
+      if (slots.tracking_id) {
+        setAppId(String(slots.tracking_id));
+      }
+    });
+    return () => unsub();
+  }, [registerSlotListener]);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();

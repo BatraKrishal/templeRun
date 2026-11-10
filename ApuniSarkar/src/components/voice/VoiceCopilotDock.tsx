@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, MicOff, Volume2, Sparkles, ChevronDown, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Mic, MicOff, Volume2, Sparkles, ChevronDown, CheckCircle2, AlertCircle, X, Compass, FileEdit } from 'lucide-react';
 import { useVoice } from '../../context/VoiceContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
 
@@ -12,21 +12,45 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
     transcript,
     assistantReplyHindi,
     assistantReplyEnglish,
+    detectedLanguage,
+    actionStatus,
     activeIntent,
     lastTargetRoute,
+    voiceMode,
+    setVoiceMode,
     toggleListening,
     executeVoiceCommand,
     stopSpeaking,
+    recognitionLang,
+    setRecognitionLang,
   } = useVoice();
 
   const [expanded, setExpanded] = useState<boolean>(false);
 
-  const quickPrompts = [
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isFormRoute =
+    pathname.includes('/services/') ||
+    pathname.includes('/forms/') ||
+    pathname.includes('/download-certificates') ||
+    pathname.includes('/track');
+
+  const effectiveMode = voiceMode === 'AUTO' ? (isFormRoute ? 'FORM' : 'NAVIGATION') : voiceMode;
+
+  const navPrompts = [
     { labelHindi: 'आय प्रमाण पत्र', labelEn: 'Income Certificate', query: 'मुझे आय प्रमाण पत्र बनवाना है' },
     { labelHindi: 'मूल निवास', labelEn: 'Domicile Form', query: 'स्थायी निवास प्रमाण पत्र खोलो' },
-    { labelHindi: 'परिवार रजिस्टर', labelEn: 'Family Register', query: 'परिवार रजिस्टर की नकल' },
-    { labelHindi: 'ट्रैक आवेदन', labelEn: 'Track Status', query: 'आवेदन ट्रैक करें UK-REV-2026-9812' },
+    { labelHindi: 'प्रमाण पत्र डाउनलोड', labelEn: 'Download Certificate', query: 'Go to Download Certificate page' },
+    { labelHindi: 'आवेदन ट्रैक', labelEn: 'Track Status', query: 'आवेदन ट्रैक करें UK-REV-2026-9812' },
     { labelHindi: 'हेल्पलाइन 1905', labelEn: 'Helpline 1905', query: 'टोल फ्री हेल्पलाइन नंबर क्या है' },
+  ];
+
+  const formPrompts = [
+    { labelHindi: '✍️ पिता का नाम', labelEn: '✍️ Father Name', query: 'father name Indra Singh Bisht' },
+    { labelHindi: '💰 वार्षिक आय ₹60,000', labelEn: '💰 Annual Income 60k', query: 'annual income 60000' },
+    { labelHindi: '📱 मोबाइल नंबर', labelEn: '📱 Mobile 9876543210', query: 'mobile number 9876543210' },
+    { labelHindi: '👤 लिंग (पुरुष)', labelEn: '👤 Gender (Male)', query: 'select male' },
+    { labelHindi: '📋 फॉर्म जांचें', labelEn: '📋 Review Form', query: 'review form' },
+    { labelHindi: '🚀 फॉर्म जमा करें', labelEn: '🚀 Submit Form', query: 'submit form' },
   ];
 
   if (!expanded) {
@@ -117,6 +141,44 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
           </div>
         </div>
 
+        {/* Mode Switcher Banner */}
+        <div className="bg-gray-100/95 border-b border-gray-200 px-3.5 py-2 flex items-center justify-between text-[11px] select-none">
+          <div className="flex items-center gap-1.5">
+            <span className="text-gray-500 font-medium">मोड:</span>
+            <button
+              type="button"
+              onClick={() => setVoiceMode(effectiveMode === 'FORM' ? 'NAVIGATION' : 'FORM')}
+              className={`px-2 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-xs cursor-pointer transition-all ${
+                effectiveMode === 'FORM'
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200'
+                  : 'bg-blue-100 text-blue-900 border border-blue-300 hover:bg-blue-200'
+              }`}
+              title="Click to toggle between Form Filling Mode and Navigation Mode"
+            >
+              {effectiveMode === 'FORM' ? (
+                <>
+                  <FileEdit className="size-3 text-amber-700" />
+                  <span>फॉर्म मोड (Form Mode)</span>
+                </>
+              ) : (
+                <>
+                  <Compass className="size-3 text-blue-700" />
+                  <span>नेविगेशन मोड (Nav Mode)</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setVoiceMode(effectiveMode === 'FORM' ? 'NAVIGATION' : 'FORM')}
+            className="text-[10px] font-semibold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
+            title="Click to switch modes"
+          >
+            <span>{effectiveMode === 'FORM' ? 'नेविगेशन बदलें 🌐' : 'फॉर्म मोड बदलें 📝'}</span>
+          </button>
+        </div>
+
         {/* Expanded Body */}
         <div className="p-3.5 space-y-3 text-xs">
           {/* Live Waveform / Mic Visualizer */}
@@ -141,11 +203,24 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between text-[11px] font-semibold text-ink-700">
                 <span>{isListening ? '🔴 नागरिक आवाज रिकॉर्ड हो रही है...' : '🎙️ अपनी भाषा में बोलें:'}</span>
-                <span className="text-[10px] text-gray-500">हिंदी / गढ़वाली / EN</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setRecognitionLang(recognitionLang === 'hi-IN' ? 'en-IN' : 'hi-IN')}
+                    className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white border border-gray-300 text-ink-800 hover:bg-gray-100 cursor-pointer shadow-2xs"
+                    title="Click to toggle recognition language (English / हिन्दी)"
+                  >
+                    {recognitionLang === 'hi-IN' ? '🇮🇳 हिन्दी' : '🌐 English'}
+                  </button>
+                </div>
               </div>
               <p className="mt-1 text-xs text-ink-900 font-medium truncate bg-white px-2 py-1 rounded border border-gray-200 min-h-[26px]">
                 {transcript || (
-                  <span className="text-gray-400 italic">उदा: "मुझे आय प्रमाण पत्र का फॉर्म भरना है"</span>
+                  <span className="text-gray-400 italic">
+                    {effectiveMode === 'FORM'
+                      ? 'उदा: "पिता का नाम इन्द्र सिंह बिष्ट", "annual income 60000"'
+                      : 'उदा: "आय प्रमाण पत्र खोलो", "Download Certificate"'}
+                  </span>
                 )}
               </p>
             </div>
@@ -155,7 +230,24 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
           {(assistantReplyHindi || assistantReplyEnglish) && (
             <div className="bg-orange-50/70 border border-orange-200 p-2.5 rounded-xl space-y-1 animate-fade-in">
               <div className="flex items-center justify-between text-[10px] font-bold text-primary uppercase">
-                <span>उत्तराखंड ई-सहायक उत्तर (ElevenLabs Voice):</span>
+                <div className="flex items-center gap-1.5">
+                  <span>उत्तराखंड ई-सहायक उत्तर (ElevenLabs Voice):</span>
+                  {actionStatus && (
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                        actionStatus === 'SUCCESS'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : actionStatus === 'AMBIGUOUS'
+                          ? 'bg-amber-100 text-amber-800'
+                          : actionStatus === 'NEEDS_CONFIRMATION'
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {actionStatus}
+                    </span>
+                  )}
+                </div>
                 {lastTargetRoute && (
                   <button
                     onClick={() => onNavigate(lastTargetRoute)}
@@ -166,18 +258,29 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
                 )}
               </div>
               <p className="text-xs text-ink-900 leading-snug font-medium">
-                {language === 'hi' ? assistantReplyHindi : assistantReplyEnglish || assistantReplyHindi}
+                {detectedLanguage === 'hi'
+                  ? assistantReplyHindi
+                  : detectedLanguage === 'hinglish'
+                  ? assistantReplyHindi || assistantReplyEnglish
+                  : assistantReplyEnglish || assistantReplyHindi}
               </p>
             </div>
           )}
 
-          {/* Quick Voice Chips */}
+          {/* Quick Voice Chips (Context-Aware) */}
           <div>
-            <div className="text-[10px] font-semibold text-gray-500 mb-1.5 uppercase">
-              त्वरित सुझाव (Quick Voice Commands):
+            <div className="text-[10px] font-semibold text-gray-500 mb-1.5 uppercase flex items-center justify-between">
+              <span>
+                {effectiveMode === 'FORM'
+                  ? 'फॉर्म त्वरित सुझाव (Form Voice Prompts):'
+                  : 'नेविगेशन सुझाव (Navigation Prompts):'}
+              </span>
+              <span className="text-[9px] text-primary/80 lowercase">
+                {effectiveMode === 'FORM' ? 'form mode' : 'nav mode'}
+              </span>
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {quickPrompts.map((p, idx) => (
+              {(effectiveMode === 'FORM' ? formPrompts : navPrompts).map((p, idx) => (
                 <button
                   key={idx}
                   onClick={() => executeVoiceCommand(p.query)}

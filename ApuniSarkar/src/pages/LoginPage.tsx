@@ -98,6 +98,9 @@ export const LoginPage: React.FC<{ onNavigate: (route: string) => void }> = ({ o
                   User ID / Email / Mobile
                 </label>
                 <input
+                  id="emailOrPhone"
+                  name="emailOrPhone"
+                  aria-label="User ID or Email or Mobile"
                   type="text"
                   required
                   value={emailOrPhone}
@@ -113,6 +116,9 @@ export const LoginPage: React.FC<{ onNavigate: (route: string) => void }> = ({ o
                 </label>
                 <div className="relative">
                   <input
+                    id="password"
+                    name="password"
+                    aria-label="Password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}

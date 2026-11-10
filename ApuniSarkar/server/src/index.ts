@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 // Load environment configuration
@@ -165,6 +166,16 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Serve frontend static files if built
+const DIST_PATH = path.resolve(__dirname, '../../dist');
+if (fs.existsSync(DIST_PATH)) {
+  app.use(express.static(DIST_PATH));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(path.join(DIST_PATH, 'index.html'));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`=======================================================`);

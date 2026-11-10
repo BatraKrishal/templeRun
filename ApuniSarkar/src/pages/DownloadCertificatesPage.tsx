@@ -86,6 +86,9 @@ export const DownloadCertificatesPage: React.FC<{ onNavigate: (route: string) =>
                 {searchBy === 'applicationId' ? (
                   <div className="flex flex-col sm:flex-row items-start gap-3">
                     <input
+                      id="appId"
+                      name="appId"
+                      aria-label="Application Id"
                       type="text"
                       maxLength={16}
                       value={appId}
@@ -104,6 +107,9 @@ export const DownloadCertificatesPage: React.FC<{ onNavigate: (route: string) =>
                 ) : (
                   <div className="flex flex-col sm:flex-row items-start gap-3">
                     <input
+                      id="mobile"
+                      name="mobile"
+                      aria-label="Mobile Number"
                       type="text"
                       maxLength={10}
                       value={mobile}

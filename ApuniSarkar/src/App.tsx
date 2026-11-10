@@ -41,6 +41,10 @@ export const App: React.FC = () => {
     setCurrentRoute(window.location.pathname || '/');
 
     setNavigationHandler((newRoute: string) => {
+      if (newRoute === '__BACK__') {
+        window.history.back();
+        return;
+      }
       window.history.pushState({}, '', newRoute);
       setCurrentRoute(newRoute);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -56,6 +60,10 @@ export const App: React.FC = () => {
   }, []);
 
   const navigate = (route: string) => {
+    if (route === '__BACK__') {
+      window.history.back();
+      return;
+    }
     window.history.pushState({}, '', route);
     setCurrentRoute(route);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -93,13 +101,13 @@ export const App: React.FC = () => {
       case '/sitemap':
         return <SitemapPage onNavigate={navigate} />;
       case '/about':
-        return <AboutPage />;
+        return <AboutPage onNavigate={navigate} />;
       case '/faqs':
-        return <FAQsPage />;
+        return <FAQsPage onNavigate={navigate} />;
       case '/whats-new':
-        return <WhatsNewPage />;
+        return <WhatsNewPage onNavigate={navigate} />;
       case '/contact-us':
-        return <ContactUsPage />;
+        return <ContactUsPage onNavigate={navigate} />;
       case '/dashboard':
         return <DashboardPage />;
       default:

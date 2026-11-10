@@ -26,7 +26,7 @@ export interface PoolState {
   keys: KeyRecord[];
   history: Array<{
     timestamp: string;
-    event: 'KEY_ROTATED' | 'QUOTA_EXHAUSTED' | 'ALERT_SENT' | 'CACHE_HIT' | 'KEY_RESTORED';
+    event: 'KEY_ROTATED' | 'QUOTA_EXHAUSTED' | 'ALERT_SENT' | 'CACHE_HIT' | 'KEY_RESTORED' | 'RATE_LIMITED';
     details: string;
   }>;
 }
@@ -50,6 +50,8 @@ export interface IntentRequest {
 
 export interface IntentResponse {
   intent: 'NAVIGATE' | 'FILL_FIELD' | 'READ_SUMMARY' | 'TRACK_STATUS' | 'VERIFY_CERTIFICATE' | 'EXPLAIN_ELEMENT' | 'GENERAL_QUERY';
+  status?: 'SUCCESS' | 'FAILED' | 'AMBIGUOUS' | 'NOT_FOUND' | 'NEEDS_CONFIRMATION';
+  detectedLanguage?: 'hi' | 'hinglish' | 'en';
   targetRoute?: string;
   serviceId?: string;
   extractedSlots?: Record<string, string | number>;
