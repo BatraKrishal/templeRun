@@ -21,27 +21,50 @@ export const CitizenSignOffModal: React.FC<SignOffProps> = ({
   const { language } = useAccessibility();
   const { speakText, isSpeaking, stopSpeaking } = useVoice();
   const [hasConfirmed, setHasConfirmed] = useState(false);
+  const wasOpenRef = React.useRef(false);
 
   useEffect(() => {
     if (isOpen) {
+      wasOpenRef.current = true;
       // Auto spoken summary read-back
       const summaryTextHindi = `कृपया अपने विवरण की पुष्टि करें। सेवा: ${serviceTitle}। आवेदक का नाम: ${
         formData.applicant_name || 'लागू नहीं'
       }। पिता या पति का नाम: ${formData.father_husband_name || 'लागू नहीं'}। वार्षिक आय: ₹${
         formData.annual_income || 'लागू नहीं'
-      }। ज़िला: ${formData.district || 'लागू नहीं'}। क्या आप आधिकारिक आवेदन पत्र जमा करने की अनुमति देते हैं?`;
+      }। ज़िला: ${formData.district || 'लागू नहीं'}। क्या आप आधिकारिक आवेदन पत्र जमा करने की अनुमति देते हैं? बोलें "हाँ" या "स्वीकृत है"।`;
 
       const summaryTextEn = `Please confirm your application details. Service: ${serviceTitle}. Applicant: ${
         formData.applicant_name || 'N/A'
       }. Father/Spouse: ${formData.father_husband_name || 'N/A'}. Annual Income: ₹${
         formData.annual_income || 'N/A'
-      }. District: ${formData.district || 'N/A'}. Do you authorize official submission?`;
+      }. District: ${formData.district || 'N/A'}. Do you authorize official submission? Say "Yes" or "Confirm".`;
 
       speakText(language === 'hi' ? summaryTextHindi : summaryTextEn);
-    } else {
+
+      const handleVoiceConfirm = () => {
+        setHasConfirmed(true);
+        setTimeout(() => {
+          onConfirm();
+          onClose();
+        }, 300);
+      };
+
+      const handleVoiceCancel = () => {
+        onClose();
+      };
+
+      window.addEventListener('voice-signoff-confirm', handleVoiceConfirm);
+      window.addEventListener('voice-signoff-cancel', handleVoiceCancel);
+
+      return () => {
+        window.removeEventListener('voice-signoff-confirm', handleVoiceConfirm);
+        window.removeEventListener('voice-signoff-cancel', handleVoiceCancel);
+      };
+    } else if (wasOpenRef.current) {
+      wasOpenRef.current = false;
       stopSpeaking();
     }
-  }, [isOpen]);
+  }, [isOpen, serviceTitle, language]);
 
   if (!isOpen) return null;
 

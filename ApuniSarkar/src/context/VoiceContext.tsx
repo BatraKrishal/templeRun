@@ -301,13 +301,19 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           URL.revokeObjectURL(audioUrl);
         };
 
-        audio.onerror = () => {
-          console.warn('[VoiceContext] Audio stream error, falling back to Web Speech API');
+        audio.onerror = (e) => {
+          console.warn('[VoiceContext] Audio stream error, falling back to Web Speech API', e);
           fallbackBrowserSpeech(text, speechLang);
         };
 
-        await audio.play();
-        return;
+        try {
+          await audio.play();
+          return;
+        } catch (playErr) {
+          console.warn('[VoiceContext] Audio play() failed (e.g. autoplay policy), falling back to browser speech:', playErr);
+          fallbackBrowserSpeech(text, speechLang);
+          return;
+        }
       }
     } catch (err) {
       console.warn('[VoiceContext] Backend TTS unreachable, falling back to Web Speech API:', err);
@@ -320,16 +326,19 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const fallbackBrowserSpeech = (text: string, lang: 'hi' | 'en') => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
-      utterance.rate = 1.0;
-      utterance.onend = () => {
-        setState((prev) => ({ ...prev, isSpeaking: false }));
-      };
-      utterance.onerror = () => {
-        setState((prev) => ({ ...prev, isSpeaking: false }));
-      };
-      window.speechSynthesis.speak(utterance);
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+        utterance.rate = 1.0;
+        utterance.onend = () => {
+          setState((prev) => ({ ...prev, isSpeaking: false }));
+        };
+        utterance.onerror = (e) => {
+          console.warn('[VoiceContext] Speech synthesis error:', e);
+          setState((prev) => ({ ...prev, isSpeaking: false }));
+        };
+        window.speechSynthesis.speak(utterance);
+      }, 50);
     } else {
       setState((prev) => ({ ...prev, isSpeaking: false }));
     }
