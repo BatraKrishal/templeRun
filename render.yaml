@@ -27,7 +27,9 @@ services:
       - key: KEY_ROTATION_THRESHOLD_CHARS
         value: "9500"
 
-      # ElevenLabs 8-9 Accounts Key Pool (Provide in Render Dashboard)
+      # ==============================================================================
+      # Active ElevenLabs Key Pool (Accounts 1 to 4) - Provide in Render Dashboard
+      # ==============================================================================
       - key: ELEVENLABS_API_KEY_1
         sync: false
       - key: ELEVENLABS_EMAIL_1
@@ -44,28 +46,40 @@ services:
         sync: false
       - key: ELEVENLABS_EMAIL_4
         sync: false
-      - key: ELEVENLABS_API_KEY_5
-        sync: false
-      - key: ELEVENLABS_EMAIL_5
-        sync: false
-      - key: ELEVENLABS_API_KEY_6
-        sync: false
-      - key: ELEVENLABS_EMAIL_6
-        sync: false
-      - key: ELEVENLABS_API_KEY_7
-        sync: false
-      - key: ELEVENLABS_EMAIL_7
-        sync: false
-      - key: ELEVENLABS_API_KEY_8
-        sync: false
-      - key: ELEVENLABS_EMAIL_8
-        sync: false
-      - key: ELEVENLABS_API_KEY_9
-        sync: false
-      - key: ELEVENLABS_EMAIL_9
-        sync: false
 
-      # Google Gemini (Intent Routing & Slot Extraction)
+      # Accounts 5 to 9 (Commented out in .env - enable in Render when created)
+      # - key: ELEVENLABS_API_KEY_5
+      #   sync: false
+      # - key: ELEVENLABS_EMAIL_5
+      #   sync: false
+      # - key: ELEVENLABS_API_KEY_6
+      #   sync: false
+      # - key: ELEVENLABS_EMAIL_6
+      #   sync: false
+      # - key: ELEVENLABS_API_KEY_7
+      #   sync: false
+      # - key: ELEVENLABS_EMAIL_7
+      #   sync: false
+      # - key: ELEVENLABS_API_KEY_8
+      #   sync: false
+      # - key: ELEVENLABS_EMAIL_8
+      #   sync: false
+      # - key: ELEVENLABS_API_KEY_9
+      #   sync: false
+      # - key: ELEVENLABS_EMAIL_9
+      #   sync: false
+
+      # Google Gemini (Optional for intent routing & slot extraction)
       - key: GEMINI_API_KEY
         sync: false
+
+      # Automated Alert Email Settings
+      - key: ALERT_RECIPIENT_EMAIL
+        value: "admin@apunisarkar-dev.gov.in"
+      - key: SMTP_HOST
+        value: "smtp.gmail.com"
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
 
