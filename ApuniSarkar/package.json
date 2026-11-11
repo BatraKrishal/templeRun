@@ -12,6 +12,7 @@
     "build:client": "vite build",
     "build:server": "tsc -p server/tsconfig.json",
     "build": "npm run build:client",
+    "start": "tsx server/src/index.ts",
     "preview": "vite preview"
   },
   "dependencies": {

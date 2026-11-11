@@ -147,6 +147,33 @@ export class SlotNormalizerService {
       slots.purpose = 'SCHEME';
     }
 
+    // 12. Detect Aadhaar Number (12 digits, often spoken with spaces or dashes)
+    // DPDP Act 2023 Compliance: Mask the first 8 digits, store only masked representation & last 4 digits
+    const aadhaarMatch = spokenText.match(/(?:aadhaar|आधार|uid|adhar|uidai)?\s*([0-9]{4})[\s-]?([0-9]{4})[\s-]?([0-9]{4})/i);
+    if (aadhaarMatch && aadhaarMatch[1] && aadhaarMatch[2] && aadhaarMatch[3]) {
+      const lastFour = aadhaarMatch[3];
+      slots.aadhaar_last_four = lastFour;
+      slots.aadhaar_number = `XXXX-XXXX-${lastFour}`;
+    }
+
+    // 13. Detect Head of Family Name (Pariwar Register)
+    const headMatch = spokenText.match(/(?:head of family|मुखिया का नाम|family head|मुखिया)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i);
+    if (headMatch && headMatch[1]) {
+      slots.head_of_family_name = this.cleanName(headMatch[1]);
+    } else if (activeFieldId === 'head_of_family_name') {
+      slots.head_of_family_name = this.cleanName(spokenText);
+    }
+
+    // 14. Detect Development Block & Gram Panchayat
+    const blockMatch = spokenText.match(/(?:development block|block|विकास खंड|ब्लॉक)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i);
+    if (blockMatch && blockMatch[1]) {
+      slots.development_block = this.cleanName(blockMatch[1]);
+    }
+    const panchayatMatch = spokenText.match(/(?:gram panchayat|panchayat|ग्राम पंचायत|पंचायत)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i);
+    if (panchayatMatch && panchayatMatch[1]) {
+      slots.gram_panchayat = this.cleanName(panchayatMatch[1]);
+    }
+
     return slots;
   }
 
