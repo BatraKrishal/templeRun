@@ -68,13 +68,6 @@ export const IncomeCertificatePage: React.FC<{ onNavigate: (route: string) => vo
       setVoiceFilledFields((prev) => ({ ...prev, ...newVoiceFilled }));
     });
 
-    // Welcome speech
-    speakText(
-      language === 'hi'
-        ? 'आय प्रमाण पत्र आवेदन में आपका स्वागत है। आप बोलकर फॉर्म भर सकते हैं। जैसे: मेरा नाम कुलदीप सिंह नेगी है, पिता जी का नाम खुशाल सिंह, और वार्षिक आय साठ हज़ार रुपये है।'
-        : 'Welcome to Income Certificate form. You can fill details by voice naturally.'
-    );
-
     return () => unsubscribe();
   }, []);
 

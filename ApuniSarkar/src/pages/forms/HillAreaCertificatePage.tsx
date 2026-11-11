@@ -31,12 +31,6 @@ export const HillAreaCertificatePage: React.FC<{ onNavigate: (route: string) => 
       setVoiceFilledFields((prev) => ({ ...prev, ...flags }));
     });
 
-    speakText(
-      language === 'hi'
-        ? 'पर्वतीय क्षेत्र प्रमाण पत्र फॉर्म में आपका स्वागत है। बोलकर अपना नाम एवं पर्वतीय तहसील बताएं।'
-        : 'Welcome to Hill Area Certificate application form.'
-    );
-
     return () => unsub();
   }, []);
 

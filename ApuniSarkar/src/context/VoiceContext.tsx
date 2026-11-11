@@ -92,6 +92,8 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const recognitionRef = useRef<any>(null);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const speechEpochRef = useRef<number>(0);
+  const speechAbortControllerRef = useRef<AbortController | null>(null);
   const slotListenersRef = useRef<Array<(slots: Record<string, any>) => void>>([]);
   const [navigationHandler, setNavHandlerState] = useState<((route: string) => void) | null>(null);
   const navHandlerRef = useRef<((route: string) => void) | null>(null);
@@ -306,12 +308,25 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const stopSpeaking = () => {
+    speechEpochRef.current += 1;
+    if (speechAbortControllerRef.current) {
+      try {
+        speechAbortControllerRef.current.abort();
+      } catch (e) {}
+      speechAbortControllerRef.current = null;
+    }
     if (audioPlayerRef.current) {
-      audioPlayerRef.current.pause();
+      try {
+        audioPlayerRef.current.pause();
+        audioPlayerRef.current.currentTime = 0;
+        audioPlayerRef.current.src = '';
+      } catch (e) {}
       audioPlayerRef.current = null;
     }
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
     }
     isSpeakingRef.current = false;
     setState((prev) => ({ ...prev, isSpeaking: false }));
@@ -319,6 +334,10 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const speakText = async (text: string, lang?: 'hi' | 'en'): Promise<void> => {
     stopSpeaking();
+    const currentEpoch = speechEpochRef.current;
+    const abortController = new AbortController();
+    speechAbortControllerRef.current = abortController;
+
     isSpeakingRef.current = true;
     setState((prev) => ({ ...prev, isSpeaking: true }));
     const speechLang = lang || 'hi';
@@ -332,69 +351,105 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           text,
           language: speechLang,
         }),
+        signal: abortController.signal,
       });
+
+      if (speechEpochRef.current !== currentEpoch) {
+        return;
+      }
 
       if (response.ok) {
         const audioBlob = await response.blob();
+        if (speechEpochRef.current !== currentEpoch) {
+          return;
+        }
+
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
+
+        if (audioPlayerRef.current) {
+          try {
+            audioPlayerRef.current.pause();
+            audioPlayerRef.current.src = '';
+          } catch (e) {}
+        }
         audioPlayerRef.current = audio;
 
         audio.onended = () => {
+          if (speechEpochRef.current !== currentEpoch) return;
+          audioPlayerRef.current = null;
           setState((prev) => ({ ...prev, isSpeaking: false }));
           URL.revokeObjectURL(audioUrl);
           // 350ms echo dissipation buffer before opening AEC gate
           setTimeout(() => {
-            isSpeakingRef.current = false;
-            if (handsFreeModeRef.current && shouldBeListeningRef.current && !isListeningRef.current) {
-              try {
-                recognitionRef.current?.start();
-              } catch (e) {}
+            if (speechEpochRef.current === currentEpoch) {
+              isSpeakingRef.current = false;
+              if (handsFreeModeRef.current && shouldBeListeningRef.current && !isListeningRef.current) {
+                try {
+                  recognitionRef.current?.start();
+                } catch (e) {}
+              }
             }
           }, 350);
         };
 
         audio.onerror = (e) => {
+          if (speechEpochRef.current !== currentEpoch) return;
           console.warn('[VoiceContext] Audio stream error, falling back to Web Speech API', e);
-          fallbackBrowserSpeech(text, speechLang);
+          fallbackBrowserSpeech(text, speechLang, currentEpoch);
         };
 
         try {
           await audio.play();
           return;
         } catch (playErr) {
+          if (speechEpochRef.current !== currentEpoch) return;
           console.warn('[VoiceContext] Audio play() failed (e.g. autoplay policy), falling back to browser speech:', playErr);
-          fallbackBrowserSpeech(text, speechLang);
+          fallbackBrowserSpeech(text, speechLang, currentEpoch);
           return;
         }
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || speechEpochRef.current !== currentEpoch) {
+        return;
+      }
       console.warn('[VoiceContext] Backend TTS unreachable, falling back to Web Speech API:', err);
     }
 
+    if (speechEpochRef.current !== currentEpoch) {
+      return;
+    }
+
     // 2. Fail-safe Fallback: Web Speech API
-    fallbackBrowserSpeech(text, speechLang);
+    fallbackBrowserSpeech(text, speechLang, currentEpoch);
   };
 
-  const fallbackBrowserSpeech = (text: string, lang: 'hi' | 'en') => {
+  const fallbackBrowserSpeech = (text: string, lang: 'hi' | 'en', epoch: number) => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
       setTimeout(() => {
+        if (speechEpochRef.current !== epoch) return;
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
         utterance.rate = 1.0;
         utterance.onend = () => {
+          if (speechEpochRef.current !== epoch) return;
           setState((prev) => ({ ...prev, isSpeaking: false }));
           setTimeout(() => {
-            isSpeakingRef.current = false;
-            if (handsFreeModeRef.current && shouldBeListeningRef.current && !isListeningRef.current) {
-              try {
-                recognitionRef.current?.start();
-              } catch (e) {}
+            if (speechEpochRef.current === epoch) {
+              isSpeakingRef.current = false;
+              if (handsFreeModeRef.current && shouldBeListeningRef.current && !isListeningRef.current) {
+                try {
+                  recognitionRef.current?.start();
+                } catch (e) {}
+              }
             }
           }, 350);
         };
         utterance.onerror = (e) => {
+          if (speechEpochRef.current !== epoch) return;
           console.warn('[VoiceContext] Speech synthesis error:', e);
           setState((prev) => ({ ...prev, isSpeaking: false }));
           isSpeakingRef.current = false;
@@ -402,8 +457,10 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         window.speechSynthesis.speak(utterance);
       }, 50);
     } else {
-      isSpeakingRef.current = false;
-      setState((prev) => ({ ...prev, isSpeaking: false }));
+      if (speechEpochRef.current === epoch) {
+        isSpeakingRef.current = false;
+        setState((prev) => ({ ...prev, isSpeaking: false }));
+      }
     }
   };
 

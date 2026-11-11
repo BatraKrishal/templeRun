@@ -45,12 +45,6 @@ export const DomicileCertificatePage: React.FC<{ onNavigate: (route: string) => 
       setVoiceFilledFields((prev) => ({ ...prev, ...flags }));
     });
 
-    speakText(
-      language === 'hi'
-        ? 'स्थायी निवास प्रमाण पत्र पृष्ठ में आपका स्वागत है। कृपया अपना नाम, पिता का नाम और जनपद बताएं।'
-        : 'Welcome to Permanent Residence (Domicile) Certificate form.'
-    );
-
     return () => unsub();
   }, []);
 

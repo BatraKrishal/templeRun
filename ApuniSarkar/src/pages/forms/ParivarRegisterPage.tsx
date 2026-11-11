@@ -22,12 +22,6 @@ export const ParivarRegisterPage: React.FC<{ onNavigate: (route: string) => void
       setSearchParams((prev) => ({ ...prev, ...slots }));
     });
 
-    speakText(
-      language === 'hi'
-        ? 'परिवार रजिस्टर की नकल खोज पोर्टल में आपका स्वागत है। आप ग्राम पंचायत अथवा परिवार मुखिया का नाम बोलकर खोज सकते हैं।'
-        : 'Welcome to Pariwar Register copy search portal. Speak district or head of family name.'
-    );
-
     return () => unsub();
   }, []);
 
