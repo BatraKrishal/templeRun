@@ -175,12 +175,13 @@ export class FormInteractionEngine {
     const aliasMap: Record<string, string[]> = {
       applicant_name: [
         'applicant name', 'full name', 'citizen name', 'your name', 'name',
-        'नाम', 'आवेदक का नाम', 'पूरा नाम', 'आवेदक का पूरा नाम', 'naam', 'applicant_name', 'myaaru nau', 'myero nau'
+        'मेरा नाम', 'आवेदक का नाम', 'पूरा नाम', 'आवेदक का पूरा नाम', 'नाम', 'आवेदक', 'naam', 'applicant_name', 'myaaru nau', 'myero nau'
       ],
       father_husband_name: [
-        'father name', 'father husband name', 'husband name', "father's name", 'father',
-        'पिता का नाम', 'पिता अथवा पति का नाम', 'पति का नाम', 'पिताजी का नाम', 'पिताजी', 'पिता', 'पति', 'बाबूजी', 'बौजी',
-        'pita ka naam', 'pita', 'pitaji', 'bauji', 'father_husband_name'
+        'father name', 'father husband name', 'husband name', "father's name", 'father', 'husband',
+        'पिताश्री का नाम', 'पिताश्री', 'पिताजी का नाम', 'पिताजी', 'पिता जी का नाम', 'पिता का नाम', 'पिता अथवा पति का नाम', 'पति का नाम', 'पतिदेव का नाम', 'पतिदेव', 'पति',
+        'बाबूजी का नाम', 'बाबूजी को नौ', 'बाबूजी', 'बौजी को नौ', 'बौजी', 'पापा का नाम', 'पापा', 'हसबैंड का नाम', 'हसबैंड',
+        'pitashri ka naam', 'pitashri', 'pitashree ka naam', 'pitashree', 'pitaji ka naam', 'pitaji', 'pita ka naam', 'pita', 'bauji ka naam', 'bauji', 'papa ka naam', 'papa', 'patidev', 'father_husband_name'
       ],
       mobile_number: [
         'mobile number', 'phone number', 'contact number', 'mobile', 'phone',
@@ -229,6 +230,40 @@ export class FormInteractionEngine {
       ],
       aadhaar_last_four: [
         'aadhaar last 4', 'aadhaar card', 'aadhaar number', 'aadhaar', 'uid', 'आधार', 'aadhaar_last_four'
+      ],
+      years_living_in_uk: [
+        'years living in uk', 'years in uttarakhand', 'residence years', 'years living', 'living years', 'years in uk', 'years',
+        'उत्तराखंड में निवास वर्ष', 'निवास वर्ष', 'कितने साल से रह रहे हैं', 'साल', 'वर्ष', 'years_living_in_uk'
+      ],
+      ancestral_village: [
+        'ancestral village', 'native village', 'original village',
+        'मूल पैतृक गांव', 'पैतृक गांव', 'मूल गांव', 'मूल पैतृक गाँव', 'पैतृक गाँव', 'ancestral_village'
+      ],
+      reason_for_domicile: [
+        'reason for domicile', 'domicile reason', 'domicile purpose', 'purpose of domicile',
+        'निवास प्रमाण पत्र का प्रयोजन', 'निवास हेतु', 'निवास प्रयोजन', 'प्रमाण पत्र प्रयोजन', 'reason_for_domicile'
+      ],
+      head_of_family_name: [
+        'head of family name', 'family head name', 'head of family', 'family head', 'head name',
+        'परिवार मुखिया का नाम', 'परिवार मुखिया', 'मुखिया का नाम', 'मुखिया', 'head_of_family_name', 'head_name'
+      ],
+      head_name: [
+        'head of family name', 'family head name', 'head of family', 'family head', 'head name',
+        'परिवार मुखिया का नाम', 'परिवार मुखिया', 'मुखिया का नाम', 'मुखिया', 'head_of_family_name', 'head_name'
+      ],
+      development_block: [
+        'development block', 'block name', 'block',
+        'विकास खंड', 'विकास खण्ड', 'ब्लॉक', 'development_block', 'block'
+      ],
+      block: [
+        'development block', 'block name', 'block',
+        'विकास खंड', 'विकास खण्ड', 'ब्लॉक', 'development_block', 'block'
+      ],
+      hill_block: [
+        'hill block', 'पर्वतीय ब्लॉक', 'पहाड़ी ब्लॉक', 'hill_block'
+      ],
+      village_name: [
+        'village name', 'गाँव का नाम', 'गांव का नाम', 'ग्राम का नाम', 'village_name'
       ],
     };
 
@@ -462,6 +497,13 @@ export class FormInteractionEngine {
       if (type === 'date' || input.id.includes('date') || input.id.includes('dob')) {
         const parsedDate = FormInteractionEngine.parseDate(rawValue);
         if (parsedDate) finalValue = parsedDate;
+      }
+
+      // Mobile / Phone number normalization: collapse spaces and dashes e.g. "911 9066 06" -> "911906606"
+      if (type === 'tel' || input.id.includes('mobile') || input.id.includes('phone') || input.name.includes('mobile')) {
+        if (typeof finalValue === 'string') {
+          finalValue = finalValue.replace(/[\s\-]/g, '');
+        }
       }
 
       // React controlled input setter trick:
@@ -792,12 +834,13 @@ export class FormInteractionEngine {
     const aliasMap: Record<string, string[]> = {
       applicant_name: [
         'applicant name', 'full name', 'citizen name', 'your name', 'name',
-        'नाम', 'आवेदक का नाम', 'पूरा नाम', 'आवेदक का पूरा नाम', 'naam', 'applicant_name', 'myaaru nau', 'myero nau'
+        'मेरा नाम', 'आवेदक का नाम', 'पूरा नाम', 'आवेदक का पूरा नाम', 'नाम', 'आवेदक', 'naam', 'applicant_name', 'myaaru nau', 'myero nau'
       ],
       father_husband_name: [
-        'father name', 'father husband name', 'husband name', "father's name", 'father',
-        'पिता का नाम', 'पिता अथवा पति का नाम', 'पति का नाम', 'पिताजी का नाम', 'पिताजी', 'पिता', 'पति', 'बाबूजी', 'बौजी',
-        'pita ka naam', 'pita', 'pitaji', 'bauji', 'father_husband_name'
+        'father name', 'father husband name', 'husband name', "father's name", 'father', 'husband',
+        'पिताश्री का नाम', 'पिताश्री', 'पिताजी का नाम', 'पिताजी', 'पिता जी का नाम', 'पिता का नाम', 'पिता अथवा पति का नाम', 'पति का नाम', 'पतिदेव का नाम', 'पतिदेव', 'पति',
+        'बाबूजी का नाम', 'बाबूजी को नौ', 'बाबूजी', 'बौजी को नौ', 'बौजी', 'पापा का नाम', 'पापा', 'हसबैंड का नाम', 'हसबैंड',
+        'pitashri ka naam', 'pitashri', 'pitashree ka naam', 'pitashree', 'pitaji ka naam', 'pitaji', 'pita ka naam', 'pita', 'bauji ka naam', 'bauji', 'papa ka naam', 'papa', 'patidev', 'father_husband_name'
       ],
       mobile_number: [
         'mobile number', 'phone number', 'contact number', 'mobile', 'phone',
@@ -847,6 +890,40 @@ export class FormInteractionEngine {
       aadhaar_last_four: [
         'aadhaar last 4', 'aadhaar card', 'aadhaar number', 'aadhaar', 'uid', 'आधार', 'aadhaar_last_four'
       ],
+      years_living_in_uk: [
+        'years living in uk', 'years in uttarakhand', 'residence years', 'years living', 'living years', 'years in uk', 'years',
+        'उत्तराखंड में निवास वर्ष', 'निवास वर्ष', 'कितने साल से रह रहे हैं', 'साल', 'वर्ष', 'years_living_in_uk'
+      ],
+      ancestral_village: [
+        'ancestral village', 'native village', 'original village',
+        'मूल पैतृक गांव', 'पैतृक गांव', 'मूल गांव', 'मूल पैतृक गाँव', 'पैतृक गाँव', 'ancestral_village'
+      ],
+      reason_for_domicile: [
+        'reason for domicile', 'domicile reason', 'domicile purpose', 'purpose of domicile',
+        'निवास प्रमाण पत्र का प्रयोजन', 'निवास हेतु', 'निवास प्रयोजन', 'प्रमाण पत्र प्रयोजन', 'reason_for_domicile'
+      ],
+      head_of_family_name: [
+        'head of family name', 'family head name', 'head of family', 'family head', 'head name',
+        'परिवार मुखिया का नाम', 'परिवार मुखिया', 'मुखिया का नाम', 'मुखिया', 'head_of_family_name', 'head_name'
+      ],
+      head_name: [
+        'head of family name', 'family head name', 'head of family', 'family head', 'head name',
+        'परिवार मुखिया का नाम', 'परिवार मुखिया', 'मुखिया का नाम', 'मुखिया', 'head_of_family_name', 'head_name'
+      ],
+      development_block: [
+        'development block', 'block name', 'block',
+        'विकास खंड', 'विकास खण्ड', 'ब्लॉक', 'development_block', 'block'
+      ],
+      block: [
+        'development block', 'block name', 'block',
+        'विकास खंड', 'विकास खण्ड', 'ब्लॉक', 'development_block', 'block'
+      ],
+      hill_block: [
+        'hill block', 'पर्वतीय ब्लॉक', 'पहाड़ी ब्लॉक', 'hill_block'
+      ],
+      village_name: [
+        'village name', 'गाँव का नाम', 'गांव का नाम', 'ग्राम का नाम', 'village_name'
+      ],
     };
 
     interface KeyCandidate {
@@ -895,12 +972,24 @@ export class FormInteractionEngine {
           let remainder = matchedPrefix.text.slice(cand.key.length).trim();
           remainder = remainder
             .replace(/^[:=\-–,]\s*/, '')
-            .replace(/^(is|are|hai|hain|ko|mein|set to|bharo|likho|दर्ज करो|रखो|हो)\s+/i, '')
+            .replace(/^(?:is|are|hai|hain|ko|mein|set to|bharo|likho|टाइप|type|लिखो|लिखिए|डालो|भरो|दर्ज\s*करो|दर्ज|रखो|हो|करो)\s+/i, '')
             .replace(/^[:=\-–,]\s*/, '')
             .trim();
           remainder = remainder
-            .replace(/\s+(?:hai|hain|है|हैं|करो|field|दर्ज करो)$/i, '')
+            .replace(/\s+(?:hai|hain|है|हैं|करो|field|दर्ज\s*करो|दर्ज|टाइप|type|लिखो|लिखिए|डालो|daalo|भरो|bharo|ji|जी|साहब|sahab|था|tha|थी|thi|बल|bal)$/i, '')
             .trim();
+
+          // Strip leading honorifics for name fields
+          if (cand.field.id.includes('name') || cand.field.name.includes('name') || cand.field.label.toLowerCase().includes('name')) {
+            remainder = remainder
+              .replace(/^(?:श्रीमान|श्रीयुत|स्वर्गीय|श्री|श्रीमती|shri|shree|mr|mrs|smt|dr|late|swargiya)\s+/i, '')
+              .trim();
+          }
+
+          // Strip whitespace for mobile/phone fields
+          if (cand.field.id.includes('mobile') || cand.field.id.includes('phone') || cand.field.name.includes('mobile')) {
+            remainder = remainder.replace(/[\s\-]/g, '');
+          }
 
           if (remainder.length > 0) {
             let valToSet: any = remainder;

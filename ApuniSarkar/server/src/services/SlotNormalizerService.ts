@@ -213,8 +213,9 @@ export class SlotNormalizerService {
       slots.state = stateMatch[1].trim();
     }
 
-    // 6. Detect Mobile Number
-    const phoneMatch = spokenText.match(/(?:मोबाइल|phone|mobile|number)?\s*([6-9]\d{9})/);
+    // 6. Detect Mobile Number (supporting spaces/pauses in spoken digits e.g. "911 9066 06", "98765 43210")
+    const cleanDigits = spokenText.replace(/(?<=\d)[\s\-]+(?=\d)/g, '');
+    const phoneMatch = cleanDigits.match(/(?:मोबाइल(?:\s*नंबर)?|phone(?:\s*number)?|mobile(?:\s*number)?|number)?\s*([6-9]\d{9})\b/i);
     if (phoneMatch) {
       slots.mobile_number = phoneMatch[1];
     }
@@ -255,7 +256,7 @@ export class SlotNormalizerService {
         slots.applicant_name = candidate;
       }
     } else {
-      const nameRegex = /(?:मेरा नाम|म्यरु नौ|म्यर नौ|मेरो नौ|my name(?:\s+is)?|name(?:\s+is)?|applicant\s*name(?:\s+is)?|आवेदक का नाम|mera naam)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|\s+बल|\s+bal|$)/i;
+      const nameRegex = /(?:मेरा नाम|म्यरु नौ|म्यर नौ|मेरो नौ|my name(?:\s+is)?|name(?:\s+is)?|applicant\s*name(?:\s+is)?|आवेदक(?:\s*का)?\s*नाम|आवेदक|पूरा नाम|mera naam)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|\s+बल|\s+bal|$)/i;
       const nameMatch = spokenText.match(nameRegex);
       if (nameMatch && nameMatch[1]) {
         const rawName = nameMatch[1].trim();
@@ -266,8 +267,8 @@ export class SlotNormalizerService {
       }
     }
 
-    // 12. Explicit Father/Husband Name patterns
-    const fatherRegex = /(?:पिता(?: जी)? का नाम|बौजी को नौ|बाबूजी को नौ|father(?:'s|s)?\s*name(?:\s+is)?|father(?:\s+name)?|पति का नाम|pita(?:ji)?\s*ka\s*naam)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|\s+बल|\s+bal|$)/i;
+    // 12. Explicit Father/Husband Name patterns (comprehensive honorifics & kinship support)
+    const fatherRegex = /(?:पिता(?:श्री| जी|जी)?(?:\s*का\s*नाम)?|पिताश्री|बाबूजी(?:\s*का\s*नाम|\s*को\s*नौ)?|बाबूजी|पापा(?:\s*का\s*नाम)?|पापा|बौजी(?:\s*को\s*नौ)?|बौजी|father(?:'s|s)?\s*name(?:\s+is)?|father(?:\s+name)?|पति(?:देव| जी)?(?:\s*का\s*नाम)?|पतिदेव|पति|husband(?:'s|s)?\s*name|husband|pita(?:ji|shri|shree)?\s*ka\s*naam|pitashri|pitashree|pitaji|bauji|papa)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|\s+बल|\s+bal|$)/i;
     const fatherMatch = spokenText.match(fatherRegex);
     if (fatherMatch && fatherMatch[1]) {
       const rawFather = fatherMatch[1].trim();
@@ -283,20 +284,45 @@ export class SlotNormalizerService {
       const candidate = this.cleanName(headMatch[1]);
       if (!SlotNormalizerService.isNonNameText(candidate)) {
         slots.head_of_family_name = candidate;
+        slots.head_name = candidate;
       }
     }
 
     // 14. Detect Development Block & Gram Panchayat
-    const blockMatch = spokenText.match(/(?:development block|block|विकास खंड|ब्लॉक)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i);
+    const blockMatch = spokenText.match(/(?:development block|block|विकास खंड|विकास खण्ड|ब्लॉक)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i);
     if (blockMatch && blockMatch[1]) {
-      slots.development_block = this.cleanName(blockMatch[1]);
+      const cleanBlock = this.cleanName(blockMatch[1]);
+      slots.development_block = cleanBlock;
+      slots.block = cleanBlock;
     }
     const panchayatMatch = spokenText.match(/(?:gram panchayat|panchayat|ग्राम पंचायत|पंचायत)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i);
     if (panchayatMatch && panchayatMatch[1]) {
       slots.gram_panchayat = this.cleanName(panchayatMatch[1]);
     }
 
-    // 15. SAFE ACTIVE-FIELD FALLBACK (Runs ONLY if no other slot was matched and text is genuinely a name)
+    // 15. Detect Domicile & Hill Area Specific Slots
+    const yearsMatch = lower.match(/(?:living\s+in\s+uk|living\s+for|residence\s+years|निवास\s*वर्ष|साल\s*से|वर्ष\s*से)?\s*([0-9]{1,2})\s*(?:years|saal|sal|वर्ष|साल)/i) ||
+      lower.match(/(?:उत्तराखंड\s*में\s*निवास\s*वर्ष|years\s*in\s*uttarakhand)\s*[:=\-]?\s*([0-9]{1,2})/i);
+    if (yearsMatch && yearsMatch[1]) {
+      slots.years_living_in_uk = yearsMatch[1].trim();
+    }
+
+    const villageMatch = spokenText.match(/(?:ancestral\s*village|मूल\s*पैतृक\s*गांव|पैतृक\s*गांव|मूल\s*गांव|पैतृक\s*गाँव)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|$)/i);
+    if (villageMatch && villageMatch[1]) {
+      slots.ancestral_village = this.cleanName(villageMatch[1]);
+    }
+
+    if (lower.includes('domicile') || lower.includes('निवास') || lower.includes('स्थायी')) {
+      if (lower.includes('job') || lower.includes('service') || lower.includes('नौकरी') || lower.includes('रोजगार')) {
+        slots.reason_for_domicile = 'EMPLOYMENT';
+      } else if (lower.includes('education') || lower.includes('study') || lower.includes('शिक्षा') || lower.includes('दाखिला')) {
+        slots.reason_for_domicile = 'EDUCATION';
+      } else if (lower.includes('land') || lower.includes('registry') || lower.includes('जमीन') || lower.includes('भूमि')) {
+        slots.reason_for_domicile = 'LAND';
+      }
+    }
+
+    // 16. SAFE ACTIVE-FIELD FALLBACK (Runs ONLY if no other slot was matched and text is genuinely a name)
     if (Object.keys(slots).length === 0 && !SlotNormalizerService.isNonNameText(spokenText)) {
       const wordCount = spokenText.trim().split(/\s+/).length;
       const hasDigits = /\d/.test(spokenText);
@@ -306,8 +332,10 @@ export class SlotNormalizerService {
           slots.applicant_name = this.cleanName(spokenText);
         } else if (activeFieldId === 'father_husband_name') {
           slots.father_husband_name = this.cleanName(spokenText);
-        } else if (activeFieldId === 'head_of_family_name') {
-          slots.head_of_family_name = this.cleanName(spokenText);
+        } else if (activeFieldId === 'head_of_family_name' || activeFieldId === 'head_name') {
+          const cleanHead = this.cleanName(spokenText);
+          slots.head_of_family_name = cleanHead;
+          slots.head_name = cleanHead;
         }
       }
     }
@@ -317,8 +345,9 @@ export class SlotNormalizerService {
 
   private cleanName(name: string): string {
     return name
-      .replace(/^(श्री|श्रीमती|shri|mr|mrs|dr)\s+/i, '')
-      .replace(/(?:है|hai|था|tha|ji|जी|बल|bal)$/i, '')
+      .replace(/^(?:टाइप\s*करो|टाइप\s*कीजिए|टाइप|लिखो|लिखिए|डालो|भरो|दर्ज\s*करो|दर्ज|type|write|enter|fill|put)\s+/i, '')
+      .replace(/^(?:श्रीमान|श्रीयुत|स्वर्गीय|श्री|श्रीमती|shri|shree|mr|mrs|smt|dr|late|swargiya)\s+/i, '')
+      .replace(/\s+(?:टाइप\s*करो|टाइप\s*कीजिए|टाइप|लिखो|लिखिए|डालो|भरो|दर्ज\s*करो|दर्ज|करो|type|likho|daalo|bharo|karo|field|hai|hain|है|हैं|था|tha|थी|thi|ji|जी|साहब|sahab|बल|bal)$/i, '')
       .replace(/\s+/g, ' ')
       .trim();
   }

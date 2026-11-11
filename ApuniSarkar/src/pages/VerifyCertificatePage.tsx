@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, FileText, X, CheckCircle, ShieldCheck, Download, Printer } from 'lucide-react';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useVoice } from '../context/VoiceContext';
 
 export const VerifyCertificatePage: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { language, narrateElement } = useAccessibility();
-  const { speakText } = useVoice();
+  const { speakText, registerSlotListener } = useVoice();
   const [appId, setAppId] = useState('');
   const [searched, setSearched] = useState(false);
   const [certificateData, setCertificateData] = useState<any>(null);
+
+  useEffect(() => {
+    const unsub = registerSlotListener((slots) => {
+      const id = slots.tracking_id || slots.application_number || slots.application_id;
+      if (id) {
+        setAppId(String(id));
+      }
+    });
+    return () => unsub();
+  }, [registerSlotListener]);
 
   const handleVerify = (e?: React.FormEvent) => {
     if (e) e.preventDefault();

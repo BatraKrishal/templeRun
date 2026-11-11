@@ -19,11 +19,16 @@ export const ParivarRegisterPage: React.FC<{ onNavigate: (route: string) => void
 
   useEffect(() => {
     const unsub = registerSlotListener((slots) => {
-      setSearchParams((prev) => ({ ...prev, ...slots }));
+      setSearchParams((prev) => ({
+        ...prev,
+        ...slots,
+        block: slots.block || slots.development_block || prev.block,
+        head_name: slots.head_name || slots.head_of_family_name || prev.head_name,
+      }));
     });
 
     return () => unsub();
-  }, []);
+  }, [registerSlotListener]);
 
   const familyMembers = [
     { serial: 1, name: 'कुलदीप सिंह नेगी (Kuldeep Singh Negi)', relation: 'मुखिया (Self)', age: 48, literacy: 'स्नातक (Graduate)', occ: 'कृषि / स्वरोजगार' },

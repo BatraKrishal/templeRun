@@ -408,6 +408,91 @@ async function runEndToEndVerification() {
     assert(false, 'Certificate purpose dropdown synonym test failed', err.message);
   }
 
+  // 15g. Natural Hindi Kinship & Action Directive Stripping: "पिताश्री का नाम इंद्र सिंह बिष्ट टाइप"
+  try {
+    const res = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'पिताश्री का नाम इंद्र सिंह बिष्ट टाइप',
+        currentRoute: '/services/revenue/income-certificate',
+      }),
+    });
+    const data: any = await res.json();
+    assert(
+      data.intent === 'FILL_FIELD' &&
+      data.extractedSlots?.father_husband_name === 'इंद्र सिंह बिष्ट',
+      'Natural Hindi honorific "पिताश्री का नाम इंद्र सिंह बिष्ट टाइप" extracts "इंद्र सिंह बिष्ट" and strips trailing "टाइप"',
+      data
+    );
+  } catch (err: any) {
+    assert(false, 'Pitashri kinship and trailing directive test failed', err.message);
+  }
+
+  // 15h. Spoken Phone Number with Intermittent Pauses/Spaces: "मोबाइल नंबर 911 9066 061"
+  try {
+    const res = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'मोबाइल नंबर 911 9066 061',
+        currentRoute: '/services/revenue/income-certificate',
+      }),
+    });
+    const data: any = await res.json();
+    assert(
+      data.intent === 'FILL_FIELD' &&
+      data.extractedSlots?.mobile_number === '9119066061',
+      'Spoken mobile number with spaces "911 9066 061" normalizes to clean 10-digit format "9119066061"',
+      data
+    );
+  } catch (err: any) {
+    assert(false, 'Mobile number normalization test failed', err.message);
+  }
+
+  // 15i. Domicile Residence Years Slot: "उत्तराखंड में निवास वर्ष 15 साल"
+  try {
+    const res = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'उत्तराखंड में निवास वर्ष 15 साल',
+        currentRoute: '/services/revenue/domicile-certificate',
+      }),
+    });
+    const data: any = await res.json();
+    assert(
+      data.intent === 'FILL_FIELD' &&
+      data.extractedSlots?.years_living_in_uk === '15',
+      'Domicile years slot "उत्तराखंड में निवास वर्ष 15 साल" normalizes to "15"',
+      data
+    );
+  } catch (err: any) {
+    assert(false, 'Domicile years slot test failed', err.message);
+  }
+
+  // 15j. Pariwar Register Head of Family: "परिवार मुखिया का नाम कुलदीप सिंह नेगी"
+  try {
+    const res = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'परिवार मुखिया का नाम कुलदीप सिंह नेगी',
+        currentRoute: '/services/panchayati-raj/parivar-register',
+      }),
+    });
+    const data: any = await res.json();
+    assert(
+      data.intent === 'FILL_FIELD' &&
+      data.extractedSlots?.head_of_family_name === 'कुलदीप सिंह नेगी' &&
+      data.extractedSlots?.head_name === 'कुलदीप सिंह नेगी',
+      'Pariwar register head slot normalizes to both head_of_family_name and head_name',
+      data
+    );
+  } catch (err: any) {
+    assert(false, 'Pariwar register head slot test failed', err.message);
+  }
+
   // 16. Application ID Tracking Intent
   try {
     const res = await fetch('http://localhost:5000/api/voice/intent', {
