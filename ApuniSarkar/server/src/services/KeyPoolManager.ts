@@ -112,29 +112,85 @@ export class KeyPoolManager {
   }
 
   /**
-   * Parses ELEVENLABS_KEYS from .env format:
-   * "key1:email1@domain.com,key2:email2@domain.com,..."
+   * Parses ElevenLabs API keys from .env.
+   * Supports multiple formats:
+   * 1. Numbered environment variables: ELEVENLABS_API_KEY_1, ELEVENLABS_API_KEY_2, ... ELEVENLABS_API_KEY_9 (with optional ELEVENLABS_EMAIL_1, etc.)
+   * 2. Comma-separated pairs: ELEVENLABS_KEYS="key1:email1,key2:email2,..."
+   * 3. Comma-separated keys: ELEVENLABS_API_KEYS="key1,key2,key3,..."
+   * 4. Single key: ELEVENLABS_API_KEY="key"
    */
   private parseEnvKeys(): Array<{ apiKey: string; accountEmail: string; label?: string }> {
-    const raw = process.env.ELEVENLABS_KEYS || '';
-    if (!raw.trim()) {
-      // Default fallback pool of 20 simulated accounts for hackathon demo resilience
-      return Array.from({ length: 20 }, (_, i) => ({
-        apiKey: `sk_free_demo_key_${String(i + 1).padStart(2, '0')}`,
-        accountEmail: `uk.citizen.dev${i + 1}@gmail.com`,
-        label: `Account ${i + 1}`,
-      }));
+    const collected: Array<{ apiKey: string; accountEmail: string; label?: string }> = [];
+
+    // Format 1: Numbered keys (ELEVENLABS_API_KEY_1 .. ELEVENLABS_API_KEY_20)
+    for (let i = 1; i <= 20; i++) {
+      const keyVal = process.env[`ELEVENLABS_API_KEY_${i}`];
+      if (keyVal && keyVal.trim()) {
+        const emailVal = process.env[`ELEVENLABS_EMAIL_${i}`] || `account${i}@elevenlabs`;
+        const labelVal = process.env[`ELEVENLABS_LABEL_${i}`] || `Account ${i}`;
+        collected.push({
+          apiKey: keyVal.trim(),
+          accountEmail: emailVal.trim(),
+          label: labelVal.trim(),
+        });
+      }
     }
 
-    const pairs = raw.split(',').map((p) => p.trim()).filter(Boolean);
-    return pairs.map((pair, idx) => {
-      const [key, email] = pair.split(':');
-      return {
-        apiKey: key?.trim() || `sk_missing_key_${idx + 1}`,
-        accountEmail: email?.trim() || `user_${idx + 1}@gmail.com`,
-        label: `Account ${idx + 1}`,
-      };
-    });
+    // Format 2: Key-Email pairs (ELEVENLABS_KEYS="key1:email1,key2:email2,...")
+    const rawPairs = process.env.ELEVENLABS_KEYS || '';
+    if (rawPairs.trim()) {
+      const pairs = rawPairs.split(',').map((p) => p.trim()).filter(Boolean);
+      for (const pair of pairs) {
+        const [key, email] = pair.split(':');
+        if (key && key.trim() && !collected.some((c) => c.apiKey === key.trim())) {
+          const idx = collected.length + 1;
+          collected.push({
+            apiKey: key.trim(),
+            accountEmail: email?.trim() || `account${idx}@elevenlabs`,
+            label: `Account ${idx}`,
+          });
+        }
+      }
+    }
+
+    // Format 3: Comma-separated list (ELEVENLABS_API_KEYS="key1,key2,key3,...")
+    const rawList = process.env.ELEVENLABS_API_KEYS || '';
+    if (rawList.trim()) {
+      const list = rawList.split(',').map((k) => k.trim()).filter(Boolean);
+      for (const k of list) {
+        if (k && !collected.some((c) => c.apiKey === k)) {
+          const idx = collected.length + 1;
+          collected.push({
+            apiKey: k,
+            accountEmail: `account${idx}@elevenlabs`,
+            label: `Account ${idx}`,
+          });
+        }
+      }
+    }
+
+    // Format 4: Standalone single key (ELEVENLABS_API_KEY)
+    const singleKey = process.env.ELEVENLABS_API_KEY || '';
+    if (singleKey.trim() && !collected.some((c) => c.apiKey === singleKey.trim())) {
+      const singleEmail = process.env.ELEVENLABS_ACCOUNT_EMAIL || 'primary@elevenlabs';
+      collected.unshift({
+        apiKey: singleKey.trim(),
+        accountEmail: singleEmail.trim(),
+        label: 'Account 1',
+      });
+    }
+
+    if (collected.length > 0) {
+      console.log(`[KeyPoolManager] Discovered ${collected.length} ElevenLabs accounts from .env`);
+      return collected;
+    }
+
+    // Default fallback pool of 20 simulated accounts for hackathon demo resilience
+    return Array.from({ length: 20 }, (_, i) => ({
+      apiKey: `sk_free_demo_key_${String(i + 1).padStart(2, '0')}`,
+      accountEmail: `uk.citizen.dev${i + 1}@gmail.com`,
+      label: `Account ${i + 1}`,
+    }));
   }
 
   private maskApiKey(key: string): string {
@@ -311,6 +367,41 @@ export class KeyPoolManager {
 
     this.persistStateSync();
     return key;
+  }
+
+  /**
+   * Manually switches the active key in the pool (by keyId e.g. "key_03" or by index e.g. 2).
+   */
+  public switchActiveKey(keyIdentifier: string | number): KeyRecord {
+    let targetIdx = -1;
+    if (typeof keyIdentifier === 'number') {
+      targetIdx = keyIdentifier;
+    } else {
+      targetIdx = this.state.keys.findIndex(
+        (k) => k.id === keyIdentifier || k.accountEmail === keyIdentifier
+      );
+    }
+
+    if (targetIdx < 0 || targetIdx >= this.state.keys.length) {
+      throw new Error(`Invalid key identifier: ${keyIdentifier}`);
+    }
+
+    const targetKey = this.state.keys[targetIdx];
+    this.state.activeKeyIndex = targetIdx;
+
+    this.state.history.unshift({
+      timestamp: new Date().toISOString(),
+      event: 'KEY_ROTATED',
+      details: `Active key manually switched to ${targetKey.id} (${targetKey.accountEmail}).`,
+    });
+
+    if (this.state.history.length > 50) {
+      this.state.history = this.state.history.slice(0, 50);
+    }
+
+    this.persistStateSync();
+    console.log(`[KeyPoolManager] Active key manually switched to ${targetKey.id} (${targetKey.accountEmail})`);
+    return targetKey;
   }
 
   public getTelemetry() {

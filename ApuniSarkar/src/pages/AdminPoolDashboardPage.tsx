@@ -60,6 +60,26 @@ export const AdminPoolDashboardPage: React.FC = () => {
     }
   };
 
+  const handleSwitchKey = async (keyId: string) => {
+    try {
+      const res = await fetch('/api/keys/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActionMessage(`Switched active key to ${keyId} (${data.activeKey?.accountEmail})`);
+        fetchTelemetry();
+        setTimeout(() => setActionMessage(null), 4000);
+      } else {
+        alert('Error switching key: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err: any) {
+      alert('Error switching key: ' + err.message);
+    }
+  };
+
   if (loading) {
     return <div className="p-10 text-center text-sm font-semibold text-gray-500">Loading Key Pool Telemetry...</div>;
   }
@@ -233,6 +253,20 @@ export const AdminPoolDashboardPage: React.FC = () => {
                       )}
                     </td>
                     <td className="py-3 px-4 text-right">
+                      {isActive && (
+                        <span className="px-2 py-1 rounded bg-blue-100 text-blue-800 text-[10px] font-bold">
+                          Active Now
+                        </span>
+                      )}
+                      {!isActive && !isExhausted && (
+                        <button
+                          onClick={() => handleSwitchKey(k.id)}
+                          className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] inline-flex items-center gap-1 shadow-xs transition-colors"
+                          title="Switch to this key immediately"
+                        >
+                          Make Active
+                        </button>
+                      )}
                       {isExhausted && (
                         <button
                           onClick={() => handleResetKey(k.id)}

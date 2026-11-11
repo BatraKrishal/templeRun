@@ -131,6 +131,27 @@ app.post('/api/keys/test-rotation', async (req, res) => {
 });
 
 /**
+ * Manually switch the active key in the pool (by key ID or numeric index).
+ */
+app.post('/api/keys/switch', (req, res) => {
+  try {
+    const { keyId, index } = req.body;
+    const target = keyId !== undefined ? keyId : index;
+    if (target === undefined) {
+      return res.status(400).json({ error: 'keyId or index is required in request body' });
+    }
+    const switched = keyPoolManager.switchActiveKey(target);
+    return res.json({
+      message: `Active key switched to ${switched.id} (${switched.accountEmail})`,
+      activeKey: switched,
+      telemetry: keyPoolManager.getTelemetry(),
+    });
+  } catch (err: any) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+/**
  * Resets an account status back to ACTIVE.
  */
 app.post('/api/keys/reset', (req, res) => {
