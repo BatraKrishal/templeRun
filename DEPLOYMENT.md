@@ -34,16 +34,18 @@ The repository includes a ready-to-use [`render.yaml`](file:///c:/Users/Gues/Des
    - Render will detect [`render.yaml`](file:///c:/Users/Gues/Desktop/templeRun/render.yaml) automatically.
 
 4. **Set Your Environment Variables**:
-   In the Render dashboard, supply your 8–9 ElevenLabs API keys:
+   In the Render dashboard, supply your ElevenLabs API keys (Accounts 1 to 4):
    - `ELEVENLABS_API_KEY_1`: `sk_...`
-   - `ELEVENLABS_EMAIL_1`: `account1@gmail.com`
+   - `ELEVENLABS_EMAIL_1`: `your_email1@gmail.com`
    - `ELEVENLABS_API_KEY_2`: `sk_...`
-   - `ELEVENLABS_EMAIL_2`: `account2@gmail.com`
-   - *(Repeat for Keys 3 through 9)*
-   - `GEMINI_API_KEY`: *(Optional, for natural language intent routing)*
+   - `ELEVENLABS_EMAIL_2`: `your_email2@gmail.com`
+   - `ELEVENLABS_API_KEY_3`: `sk_...`
+   - `ELEVENLABS_EMAIL_3`: `your_email3@gmail.com`
+   - `ELEVENLABS_API_KEY_4`: `sk_...`
+   - `ELEVENLABS_EMAIL_4`: `your_email4@gmail.com`
 
 5. **Click "Apply" / "Deploy"**:
-   - Render will run `npm install && npm run build:client` and launch `npx tsx server/src/index.ts`.
+   - Render will run `npm install --include=dev && npm run build` and launch `npm start` (`node server/dist/index.js`).
    - Your live URL will be created: `https://apuni-sarkar-vaanisetu.onrender.com`.
 
 ---
@@ -59,8 +61,8 @@ If you prefer to configure it manually without Blueprint:
    - **Region**: `Singapore` (or Frankfurt)
    - **Root Directory**: `ApuniSarkar`
    - **Runtime**: `Node`
-   - **Build Command**: `npm install && npm run build:client`
-   - **Start Command**: `npx tsx server/src/index.ts`
+   - **Build Command**: `npm install --include=dev && npm run build`
+   - **Start Command**: `npm start`
    - **Plan**: `Free`
 4. Under **Environment Variables**, add:
    - `NODE_ENV`: `production`
