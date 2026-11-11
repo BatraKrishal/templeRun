@@ -99,7 +99,7 @@ export const AdminPoolDashboardPage: React.FC = () => {
             ElevenLabs Multi-Account Key Pool Telemetry
           </h1>
           <p className="text-xs sm:text-sm text-gray-600 mt-1">
-            Dynamic 20-Account Rotation Manager (~300 Mins Free Playback) with Automated Email Alerting
+            Dynamic {pool?.totalAccounts || 4}-Account Rotation Manager (~{pool?.totalCapacityMinutes || 60} Mins Free Playback) with Automated Email Alerting
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export const AdminPoolDashboardPage: React.FC = () => {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-sm font-bold uppercase tracking-wider text-ink-900">
-            All 20 ElevenLabs Accounts in Pool
+            All {pool?.totalAccounts || telemetry?.keys.length || 4} ElevenLabs Accounts in Pool
           </h2>
           <span className="text-xs text-gray-500 font-mono">
             Rotation Threshold: {pool?.rotationThresholdChars} chars
