@@ -23,6 +23,8 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
     stopSpeaking,
     recognitionLang,
     setRecognitionLang,
+    handsFreeMode,
+    toggleHandsFree,
   } = useVoice();
 
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -111,11 +113,15 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
               </div>
               <div className="text-[10px] text-white/70">
                 {isListening
-                  ? 'सुन रहा हूँ... (Listening)'
+                  ? handsFreeMode
+                    ? 'सतत सुन रहा हूँ... (Hands-Free)'
+                    : 'सुन रहा हूँ... (Listening)'
                   : isSpeaking
                   ? 'बोल रहा हूँ... (Speaking)'
                   : isProcessing
                   ? 'विश्लेषण कर रहा हूँ... (Processing)'
+                  : handsFreeMode
+                  ? 'सतत संवाद चालू है (बोलिए...)'
                   : 'सहायता के लिए बोलें या क्लिक करें'}
               </div>
             </div>
@@ -141,8 +147,8 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
           </div>
         </div>
 
-        {/* Mode Switcher Banner */}
-        <div className="bg-gray-100/95 border-b border-gray-200 px-3.5 py-2 flex items-center justify-between text-[11px] select-none">
+        {/* Mode & Hands-Free Switcher Banner */}
+        <div className="bg-gray-100/95 border-b border-gray-200 px-3 py-1.5 flex items-center justify-between text-[11px] select-none">
           <div className="flex items-center gap-1.5">
             <span className="text-gray-500 font-medium">मोड:</span>
             <button
@@ -158,24 +164,38 @@ export const VoiceCopilotDock: React.FC<{ onNavigate: (route: string) => void }>
               {effectiveMode === 'FORM' ? (
                 <>
                   <FileEdit className="size-3 text-amber-700" />
-                  <span>फॉर्म मोड (Form Mode)</span>
+                  <span>फॉर्म (Form)</span>
                 </>
               ) : (
                 <>
                   <Compass className="size-3 text-blue-700" />
-                  <span>नेविगेशन मोड (Nav Mode)</span>
+                  <span>नेविगेशन (Nav)</span>
                 </>
               )}
             </button>
           </div>
 
+          {/* Hands-Free Continuous Conversation Toggle */}
           <button
             type="button"
-            onClick={() => setVoiceMode(effectiveMode === 'FORM' ? 'NAVIGATION' : 'FORM')}
-            className="text-[10px] font-semibold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
-            title="Click to switch modes"
+            onClick={toggleHandsFree}
+            className={`px-2 py-0.5 rounded-full font-bold flex items-center gap-1 cursor-pointer transition-all ${
+              handsFreeMode
+                ? 'bg-emerald-100 text-emerald-900 border border-emerald-400 ring-2 ring-emerald-200 shadow-xs'
+                : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+            }`}
+            title={
+              handsFreeMode
+                ? 'सतत संवाद (Hands-Free) सक्रिय है - बिना बार-बार क्लिक किए लगातार बातचीत करें'
+                : 'सतत संवाद (Hands-Free) चालू करें - बिना क्लिक किए लगातार बातचीत करें'
+            }
           >
-            <span>{effectiveMode === 'FORM' ? 'नेविगेशन बदलें 🌐' : 'फॉर्म मोड बदलें 📝'}</span>
+            <span
+              className={`size-2 rounded-full ${
+                handsFreeMode ? 'bg-emerald-600 animate-ping' : 'bg-gray-400'
+              }`}
+            />
+            <span>{handsFreeMode ? 'सतत संवाद (ON)' : 'सतत संवाद (OFF)'}</span>
           </button>
         </div>
 

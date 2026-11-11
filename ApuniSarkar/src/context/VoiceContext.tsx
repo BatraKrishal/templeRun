@@ -48,8 +48,28 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const clearConversation = () => {
     setFormSlots({});
   };
-  const setHandsFreeMode = (_enabled: boolean) => {};
-  const toggleHandsFree = () => {};
+  const [handsFreeMode, setHandsFreeModeState] = useState<boolean>(false);
+  const handsFreeModeRef = useRef<boolean>(false);
+  const isSpeakingRef = useRef<boolean>(false);
+  const shouldBeListeningRef = useRef<boolean>(false);
+
+  const setHandsFreeMode = (enabled: boolean) => {
+    setHandsFreeModeState(enabled);
+    handsFreeModeRef.current = enabled;
+    setState((prev) => ({ ...prev, handsFreeMode: enabled }));
+    if (enabled) {
+      shouldBeListeningRef.current = true;
+      startListening();
+    } else {
+      shouldBeListeningRef.current = false;
+      stopListening();
+    }
+  };
+
+  const toggleHandsFree = () => {
+    setHandsFreeMode(!handsFreeModeRef.current);
+  };
+
   const [recognitionLang, setRecognitionLangState] = useState<'en-IN' | 'hi-IN'>(
     uiLanguage === 'hi' ? 'hi-IN' : 'en-IN'
   );
@@ -58,6 +78,8 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     isListening: false,
     isProcessing: false,
     isSpeaking: false,
+    handsFreeMode: false,
+    dialogueState: 'IDLE',
     transcript: '',
     assistantReplyHindi: 'नमस्ते! मैं अपनी सरकार वाणी-सेतु आवाज सहायक हूँ। बोलिए, मैं आपकी क्या सहायता कर सकता हूँ?',
     assistantReplyEnglish: 'Hello! I am Apuni Sarkar VaaniSetu voice assistant. How may I assist you today?',
@@ -130,6 +152,11 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       };
 
       recognition.onresult = (event: any) => {
+        // Acoustic Echo Cancellation (AEC): ignore microphone audio while assistant is speaking
+        if (isSpeakingRef.current) {
+          return;
+        }
+
         // Collect entire transcript across current session
         let interim = '';
         let final = '';
@@ -164,7 +191,12 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           ) {
             isExecutingRef.current = true;
             lastExecutedTextRef.current = textToExecute;
-            stopListening();
+            if (!handsFreeModeRef.current) {
+              stopListening();
+            } else {
+              // In continuous hands-free mode, reset accumulated buffer so next phrase accumulates cleanly
+              accumulatedTranscriptRef.current = '';
+            }
             executeVoiceCommand(textToExecute).finally(() => {
               isExecutingRef.current = false;
             });
@@ -178,7 +210,9 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return;
         }
         console.warn('[VoiceContext] Speech recognition error:', event.error);
-        setState((prev) => ({ ...prev, isListening: false, error: event.error }));
+        if (!handsFreeModeRef.current) {
+          setState((prev) => ({ ...prev, isListening: false, error: event.error }));
+        }
       };
 
       recognition.onend = () => {
@@ -197,21 +231,27 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             executeVoiceCommand(textToExecute).finally(() => {
               isExecutingRef.current = false;
             });
-            setState((prev) => ({ ...prev, isListening: false }));
+            if (!handsFreeModeRef.current) {
+              setState((prev) => ({ ...prev, isListening: false }));
+            }
             return;
           }
         }
 
-        // If continuous listening was active and interrupted unexpectedly (browser buffer cycling), auto-restart
-        if (isListeningRef.current && !isExecutingRef.current) {
-          try {
-            recognition.start();
-            return;
-          } catch (e) {
-            // Ignored
-          }
+        // If continuous hands-free listening was active, auto-restart safely without InvalidStateError
+        if (handsFreeModeRef.current && shouldBeListeningRef.current && !isExecutingRef.current) {
+          setTimeout(() => {
+            if (handsFreeModeRef.current && shouldBeListeningRef.current) {
+              try {
+                recognition.start();
+                return;
+              } catch (e) {}
+            }
+          }, 300);
+          return;
         }
 
+        isListeningRef.current = false;
         setState((prev) => ({ ...prev, isListening: false }));
       };
 
@@ -224,13 +264,14 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     accumulatedTranscriptRef.current = '';
     lastExecutedTextRef.current = '';
     isListeningRef.current = true;
+    shouldBeListeningRef.current = true;
     isExecutingRef.current = false;
 
     if (recognitionRef.current) {
       try {
         recognitionRef.current.start();
       } catch (err) {
-        console.warn('Recognition start error:', err);
+        // If already started, safely ignore
       }
     } else {
       // Mock prompt fallback when microphone is unavailable in browser
@@ -246,6 +287,7 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const stopListening = () => {
     isListeningRef.current = false;
+    shouldBeListeningRef.current = false;
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
@@ -271,11 +313,13 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
+    isSpeakingRef.current = false;
     setState((prev) => ({ ...prev, isSpeaking: false }));
   };
 
   const speakText = async (text: string, lang?: 'hi' | 'en'): Promise<void> => {
     stopSpeaking();
+    isSpeakingRef.current = true;
     setState((prev) => ({ ...prev, isSpeaking: true }));
     const speechLang = lang || 'hi';
 
@@ -299,6 +343,15 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         audio.onended = () => {
           setState((prev) => ({ ...prev, isSpeaking: false }));
           URL.revokeObjectURL(audioUrl);
+          // 350ms echo dissipation buffer before opening AEC gate
+          setTimeout(() => {
+            isSpeakingRef.current = false;
+            if (handsFreeModeRef.current && shouldBeListeningRef.current && !isListeningRef.current) {
+              try {
+                recognitionRef.current?.start();
+              } catch (e) {}
+            }
+          }, 350);
         };
 
         audio.onerror = (e) => {
@@ -332,14 +385,24 @@ export const VoiceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         utterance.rate = 1.0;
         utterance.onend = () => {
           setState((prev) => ({ ...prev, isSpeaking: false }));
+          setTimeout(() => {
+            isSpeakingRef.current = false;
+            if (handsFreeModeRef.current && shouldBeListeningRef.current && !isListeningRef.current) {
+              try {
+                recognitionRef.current?.start();
+              } catch (e) {}
+            }
+          }, 350);
         };
         utterance.onerror = (e) => {
           console.warn('[VoiceContext] Speech synthesis error:', e);
           setState((prev) => ({ ...prev, isSpeaking: false }));
+          isSpeakingRef.current = false;
         };
         window.speechSynthesis.speak(utterance);
       }, 50);
     } else {
+      isSpeakingRef.current = false;
       setState((prev) => ({ ...prev, isSpeaking: false }));
     }
   };
