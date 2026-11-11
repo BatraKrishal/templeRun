@@ -10,9 +10,9 @@
     "test": "tsx server/src/test/verifyEndToEnd.ts",
     "verify": "tsx server/src/test/verifyEndToEnd.ts",
     "build:client": "vite build",
-    "build:server": "tsc -p server/tsconfig.json",
-    "build": "npm run build:client",
-    "start": "tsx server/src/index.ts",
+    "build:server": "tsc -p server/tsconfig.json && node -e \"import('fs').then(fs => fs.cpSync('server/src/data', 'server/dist/data', { recursive: true }))\"",
+    "build": "npm run build:client && npm run build:server",
+    "start": "node server/dist/index.js",
     "preview": "vite preview"
   },
   "dependencies": {

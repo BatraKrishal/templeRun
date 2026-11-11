@@ -5,17 +5,59 @@ import { IntentRequest, IntentResponse, ServiceRecord } from '../types/index.js'
 import { SlotNormalizerService } from './SlotNormalizerService.js';
 import { RouteRegistry, RouteResolution } from './RouteRegistry.js';
 import { LanguageDetector, DetectedLanguage } from './LanguageDetector.js';
+import { SessionService } from './SessionService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const CATALOG_PATH = path.resolve(__dirname, '../data/uk_services_catalog.json');
+
+const resolveCatalogPath = (): string => {
+  const candidates = [
+    path.resolve(__dirname, '../data/uk_services_catalog.json'),
+    path.resolve(__dirname, '../../data/uk_services_catalog.json'),
+    path.resolve(__dirname, '../../src/data/uk_services_catalog.json'),
+    path.resolve(__dirname, '../../../server/src/data/uk_services_catalog.json'),
+    path.resolve(process.cwd(), 'server/src/data/uk_services_catalog.json'),
+    path.resolve(process.cwd(), 'server/data/uk_services_catalog.json'),
+    path.resolve(process.cwd(), 'server/dist/data/uk_services_catalog.json'),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return candidates[0];
+};
+
+const CATALOG_PATH = resolveCatalogPath();
 
 export class IntentRouterService {
   private servicesCatalog: ServiceRecord[] = [];
   private slotNormalizer: SlotNormalizerService;
+  private sessionService: SessionService;
 
-  constructor() {
+  private static FORM_SCHEMAS: Record<string, Array<{ id: string; labelHi: string; labelEn: string }>> = {
+    '/services/revenue/income-certificate': [
+      { id: 'applicant_name', labelHi: 'आवेदक का नाम', labelEn: 'applicant name' },
+      { id: 'father_husband_name', labelHi: 'पिता या पति का नाम', labelEn: 'father or husband name' },
+      { id: 'annual_income', labelHi: 'वार्षिक पारिवारिक आय', labelEn: 'annual family income' },
+      { id: 'district', labelHi: 'जनपद', labelEn: 'district' },
+      { id: 'mobile_number', labelHi: 'मोबाइल नंबर', labelEn: 'mobile number' },
+    ],
+    '/services/revenue/domicile-certificate': [
+      { id: 'applicant_name', labelHi: 'आवेदक का नाम', labelEn: 'applicant name' },
+      { id: 'father_husband_name', labelHi: 'पिता या पति का नाम', labelEn: 'father or husband name' },
+      { id: 'district', labelHi: 'जनपद', labelEn: 'district' },
+      { id: 'mobile_number', labelHi: 'मोबाइल नंबर', labelEn: 'mobile number' },
+    ],
+    '/pariwar-register': [
+      { id: 'district', labelHi: 'जनपद', labelEn: 'district' },
+      { id: 'development_block', labelHi: 'विकास खंड', labelEn: 'development block' },
+      { id: 'gram_panchayat', labelHi: 'ग्राम पंचायत', labelEn: 'gram panchayat' },
+      { id: 'head_of_family_name', labelHi: 'मुखिया का नाम', labelEn: 'head of family name' },
+    ],
+  };
+
+  constructor(sessionService?: SessionService) {
     this.slotNormalizer = new SlotNormalizerService();
+    this.sessionService = sessionService || new SessionService();
     this.loadCatalog();
   }
 
@@ -39,12 +81,64 @@ export class IntentRouterService {
     const text = request.transcript.trim();
     const lower = text.toLowerCase();
     const currentRoute = request.currentRoute || '/';
+    const sessionId = request.sessionId || 'default_session';
+    const session = this.sessionService.getOrCreateSession(sessionId, currentRoute);
+
+    // 0. Check Confirmation / Submission Flow
+    if (session.isConfirmationPending) {
+      const isAffirmative =
+        lower.includes('yes') ||
+        lower.includes('submit') ||
+        lower.includes('haan') ||
+        lower.includes('हाँ') ||
+        lower.includes('कर दो') ||
+        lower.includes('जमा करो') ||
+        lower.includes('theek hai') ||
+        lower.includes('ठीक है');
+
+      const isNegative =
+        lower.includes('no') ||
+        lower.includes('nahi') ||
+        lower.includes('नहीं') ||
+        lower.includes('cancel') ||
+        lower.includes('बदलो') ||
+        lower.includes('change');
+
+      if (isAffirmative) {
+        const subId = `UK-APP-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+        this.sessionService.updateSession(sessionId, {
+          isSubmitted: true,
+          isConfirmationPending: false,
+          submissionId: subId,
+        });
+        return {
+          intent: 'FORM_SUBMITTED',
+          status: 'SUCCESS',
+          submissionId: subId,
+          isFormSubmitted: true,
+          confidence: 0.99,
+          spokenResponseHindi: `आपका आवेदन सफलतापूर्वक जमा कर दिया गया है। आपका आवेदन क्रमांक ${subId} है। आप इसे कभी भी ट्रैक कर सकते हैं।`,
+          spokenResponseEnglish: `Your application has been successfully submitted! Your application ID is ${subId}. You can track its status anytime.`,
+        };
+      }
+
+      if (isNegative) {
+        this.sessionService.updateSession(sessionId, { isConfirmationPending: false });
+        return {
+          intent: 'GENERAL_QUERY',
+          confidence: 0.95,
+          spokenResponseHindi: 'आवेदन अभी जमा नहीं किया गया है। आप किस फ़ील्ड को बदलना चाहते हैं?',
+          spokenResponseEnglish: 'Submission paused. Which field would you like to update or change?',
+        };
+      }
+    }
 
     // 1. Detect language immediately
     const detectedLang: DetectedLanguage = LanguageDetector.detect(text);
 
-    // 2. Extract structured entity slots
-    const extractedSlots = this.slotNormalizer.normalizeSlots(text);
+    // 2. Extract structured entity slots with active field context from session
+    const activeFieldId = request.formContext?.activeFieldId || session.activeFieldId;
+    const extractedSlots = this.slotNormalizer.normalizeSlots(text, activeFieldId);
     const hasExtractedSlots = Object.keys(extractedSlots).length > 0;
 
     // 3. Tracking Intent
@@ -74,21 +168,58 @@ export class IntentRouterService {
     if (
       currentRoute !== '/all-services' &&
       !currentRoute.startsWith('/all-services') &&
-      (currentRoute.includes('/services/revenue/') || currentRoute.includes('/services/panchayati-raj/') || currentRoute.includes('/forms/')) &&
+      (currentRoute.includes('/services/revenue/') || currentRoute.includes('/services/panchayati-raj/') || currentRoute.includes('/forms/') || currentRoute.includes('/pariwar-register')) &&
       (hasExtractedSlots || lower.includes('enter') || lower.includes('select') || lower.includes('field') || lower.includes('दर्ज') || lower.includes('भरो'))
     ) {
+      // Accumulate in session
+      const currentFilled = { ...session.collectedSlots, ...request.formContext?.filledFields, ...extractedSlots };
+      this.sessionService.updateSession(sessionId, { collectedSlots: currentFilled });
+
+      const schema = IntentRouterService.FORM_SCHEMAS[currentRoute];
+      let nextFieldPrompt = '';
+      let nextActiveFieldId = '';
+      let isFormCompleted = false;
+
+      if (schema) {
+        const missing = schema.find((f) => !currentFilled[f.id]);
+        if (missing) {
+          nextFieldPrompt = missing.labelHi;
+          nextActiveFieldId = missing.id;
+          this.sessionService.updateSession(sessionId, { activeFieldId: missing.id });
+        } else {
+          isFormCompleted = true;
+          this.sessionService.updateSession(sessionId, { isConfirmationPending: true });
+        }
+      }
+
       const fieldNames = Object.keys(extractedSlots).join(', ');
+      const formattedHindi = this.formatSlotsHindi(extractedSlots);
+
+      let spokenResponseHindi = `मैंने ${formattedHindi} दर्ज कर दिया है।`;
+      let spokenResponseEnglish = `I have entered your ${fieldNames || 'details'}.`;
+
+      if (isFormCompleted) {
+        spokenResponseHindi += ' फॉर्म के सभी आवश्यक विवरण भर दिए गए हैं। क्या आप फॉर्म जमा करना चाहते हैं?';
+        spokenResponseEnglish += ' All required details have been filled. Would you like to submit the application?';
+      } else if (nextActiveFieldId && schema) {
+        const missingItem = schema.find((f) => f.id === nextActiveFieldId);
+        if (missingItem) {
+          spokenResponseHindi += ` कृपया ${missingItem.labelHi} बताएं।`;
+          spokenResponseEnglish += ` Please provide your ${missingItem.labelEn} next.`;
+        }
+      }
+
       return {
         intent: 'FILL_FIELD',
         targetRoute: currentRoute,
         extractedSlots,
         confidence: 0.95,
-        spokenResponseHindi: hasExtractedSlots
-          ? `मैंने ${this.formatSlotsHindi(extractedSlots)} दर्ज कर दिया है। क्या विवरण सही हैं?`
-          : 'फ़ील्ड विवरण दर्ज किया जा रहा है।',
-        spokenResponseEnglish: hasExtractedSlots
-          ? `I have entered your ${fieldNames || 'details'}. Are these details correct?`
-          : 'Entering field details on form.',
+        activeFieldId: nextActiveFieldId || undefined,
+        nextFieldPrompt: nextFieldPrompt || undefined,
+        isConfirmationPending: isFormCompleted,
+        isFormCompleted,
+        spokenResponseHindi,
+        spokenResponseEnglish,
       };
     }
 

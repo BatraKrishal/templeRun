@@ -97,3 +97,4 @@ After deployment finishes:
 2. Click the **Microphone** button and click **Allow** on the browser permission prompt.
 3. Speak: *"I want to go to registration in class D"* or *"आय प्रमाण पत्र खोलो"* to test navigation.
 4. Visit `https://your-app.onrender.com/admin/keys` to view the live 8–9 Key Pool Telemetry dashboard and test key rotation.
+

@@ -10,8 +10,9 @@ services:
     plan: free
     region: singapore # Closest region to India / Uttarakhand for minimum latency
     rootDir: ApuniSarkar
-    buildCommand: npm install && npm run build:client
-    startCommand: npx tsx server/src/index.ts
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
     autoDeploy: true
 
     envVars:
@@ -67,3 +68,4 @@ services:
       # Google Gemini (Intent Routing & Slot Extraction)
       - key: GEMINI_API_KEY
         sync: false
+
