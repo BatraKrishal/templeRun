@@ -125,7 +125,14 @@ export class KeyPoolManager {
     // Format 1: Numbered keys (ELEVENLABS_API_KEY_1 .. ELEVENLABS_API_KEY_20)
     for (let i = 1; i <= 20; i++) {
       const keyVal = process.env[`ELEVENLABS_API_KEY_${i}`];
-      if (keyVal && keyVal.trim()) {
+      if (
+        keyVal &&
+        keyVal.trim() &&
+        !keyVal.includes('your_key_') &&
+        !keyVal.includes('your_elevenlabs') &&
+        !keyVal.includes('your_api_key') &&
+        keyVal !== 'sk_...'
+      ) {
         const emailVal = process.env[`ELEVENLABS_EMAIL_${i}`] || `account${i}@elevenlabs`;
         const labelVal = process.env[`ELEVENLABS_LABEL_${i}`] || `Account ${i}`;
         collected.push({
