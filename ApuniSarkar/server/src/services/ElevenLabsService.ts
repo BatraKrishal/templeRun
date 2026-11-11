@@ -50,7 +50,11 @@ export class ElevenLabsService {
       console.log(`[ElevenLabsService] Synthesizing ${charsCount} chars using Key ${activeKey.id} (${activeKey.accountEmail})`);
 
       // Check if real key or demo fallback
-      const isRealKey = activeKey.apiKey && !activeKey.apiKey.startsWith('sk_free_demo_') && activeKey.apiKey.length > 20;
+      const isRealKey =
+        activeKey.apiKey &&
+        !activeKey.apiKey.startsWith('sk_free_demo_') &&
+        !activeKey.apiKey.includes('your_key_') &&
+        activeKey.apiKey.length > 20;
 
       if (!isRealKey) {
         // Safe mock audio generation for offline or demo testing
