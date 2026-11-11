@@ -22,6 +22,30 @@ export class SlotNormalizerService {
   ];
 
   /**
+   * Identifies whether a spoken phrase contains domain control, field or portal keywords,
+   * making it impossible to be a valid person's name.
+   */
+  public static isNonNameText(text: string): boolean {
+    const lower = text.toLowerCase().trim();
+    const domainTerms = [
+      'income', 'source', 'private', 'job', 'salaried', 'salary', 'annual', 'agriculture', 'farming', 'farmer',
+      'labour', 'business', 'shop', 'pension', 'pensioner', 'male', 'female', 'gender', 'ration', 'card',
+      'scholarship', 'admission', 'scheme', 'mobile', 'phone', 'district', 'tehsil', 'circle', 'village',
+      'ward', 'block', 'panchayat', 'aadhaar', 'uid', 'application', 'certificate', 'download', 'track',
+      'status', 'verify', 'dashboard', 'page', 'form', 'select', 'choose', 'enter', 'clear', 'submit',
+      'service', 'kholo', 'jao', 'chalo', 'dikhao', 'primary',
+      // Hindi & Devanagari terms
+      'आय', 'साधन', 'स्रोत', 'प्राइवेट', 'जॉब', 'नौकरी', 'वेतनभोगी', 'कृषि', 'बागवानी', 'किसान', 'खेती',
+      'मजदूरी', 'दिहाड़ी', 'मजदूर', 'श्रमिक', 'व्यापार', 'दुकान', 'पेंशन', 'पेंशनर', 'राशन', 'कार्ड',
+      'छात्रवृत्ति', 'वजीफा', 'प्रवेश', 'दाखिला', 'स्कूल', 'कॉलेज', 'योजना', 'लिंग', 'पुरुष', 'महिला',
+      'मोबाइल', 'फोन', 'नंबर', 'जनपद', 'जिला', 'तहसील', 'पटवारी', 'लेखपाल', 'गाँव', 'गांव', 'वार्ड',
+      'ब्लॉक', 'पंचायत', 'आधार', 'आवेदन', 'प्रमाण पत्र', 'सर्टिफिकेट', 'पेज', 'खोलो', 'जाओ', 'चलो',
+      'डैशबोर्ड', 'स्थिति', 'ट्रैक', 'जमा', 'चयन', 'प्राइमरी'
+    ];
+    return domainTerms.some((term) => lower.includes(term));
+  }
+
+  /**
    * Normalizes spoken input text into structured form slot values.
    */
   public normalizeSlots(spokenText: string, activeFieldId?: string): Record<string, any> {
@@ -34,7 +58,133 @@ export class SlotNormalizerService {
       slots.annual_income = incomeMatch;
     }
 
-    // 2. Detect Uttarakhand District or State
+    // 2. Detect Income Source (Salaried, Agriculture, Business, Labour, Pension)
+    // Check both English/Romanized and Devanagari Hindi variants
+    if (
+      lower.includes('private job') ||
+      lower.includes('private service') ||
+      lower.includes('salaried') ||
+      lower.includes('वेतनभोगी') ||
+      lower.includes('प्राइवेट नौकरी') ||
+      lower.includes('प्राइवेट जॉब') ||
+      lower.includes('प्राइवेट सर्विस') ||
+      lower.includes('प्राइवेट') ||
+      lower.includes('नौकरीपेशा') ||
+      (lower.includes('income source') && lower.includes('job')) ||
+      (lower.includes('आय का') && lower.includes('नौकरी'))
+    ) {
+      slots.income_source = 'SALARIED';
+    } else if (
+      lower.includes('agriculture') ||
+      lower.includes('farming') ||
+      lower.includes('farmer') ||
+      lower.includes('kheti') ||
+      lower.includes('kisan') ||
+      lower.includes('कृषि') ||
+      lower.includes('बागवानी') ||
+      lower.includes('किसान') ||
+      lower.includes('खेती') ||
+      lower.includes('काश्तकार')
+    ) {
+      slots.income_source = 'AGRICULTURE';
+    } else if (
+      lower.includes('labour') ||
+      lower.includes('daily labour') ||
+      lower.includes('majdoor') ||
+      lower.includes('majdoori') ||
+      lower.includes('मजदूरी') ||
+      lower.includes('दिहाड़ी') ||
+      lower.includes('मजदूर') ||
+      lower.includes('दैनिक मजदूरी') ||
+      lower.includes('श्रमिक')
+    ) {
+      slots.income_source = 'LABOUR';
+    } else if (
+      lower.includes('business') ||
+      lower.includes('shop') ||
+      lower.includes('shopkeeper') ||
+      lower.includes('vyapar') ||
+      lower.includes('dukan') ||
+      lower.includes('व्यापार') ||
+      lower.includes('दुकान') ||
+      lower.includes('व्यवसाय') ||
+      lower.includes('कारोबार') ||
+      lower.includes('स्वरोजगार')
+    ) {
+      slots.income_source = 'BUSINESS';
+    } else if (
+      lower.includes('pension') ||
+      lower.includes('pensioner') ||
+      lower.includes('retire') ||
+      lower.includes('पेंशन') ||
+      lower.includes('पेंशनर') ||
+      lower.includes('सेवानिवृत्त')
+    ) {
+      slots.income_source = 'PENSION';
+    }
+
+    // 3. Detect Certificate Purpose
+    if (
+      lower.includes('ration card') ||
+      lower.includes('राशन कार्ड') ||
+      lower.includes('राशन') ||
+      lower.includes('खाद्य सुरक्षा')
+    ) {
+      slots.purpose = 'RATION_CARD';
+    } else if (
+      lower.includes('scholarship') ||
+      lower.includes('छात्रवृत्ति') ||
+      lower.includes('वजीफा') ||
+      lower.includes('स्कॉलरशिप') ||
+      lower.includes('chhatravritti')
+    ) {
+      slots.purpose = 'SCHOLARSHIP';
+    } else if (
+      lower.includes('admission') ||
+      lower.includes('प्रवेश') ||
+      lower.includes('दाखिला') ||
+      lower.includes('school') ||
+      lower.includes('college') ||
+      lower.includes('स्कूल') ||
+      lower.includes('कॉलेज') ||
+      lower.includes('shiksha') ||
+      lower.includes('शिक्षा')
+    ) {
+      slots.purpose = 'ADMISSION';
+    } else if (
+      lower.includes('scheme') ||
+      lower.includes('योजना') ||
+      lower.includes('सरकारी योजना') ||
+      lower.includes('welfare') ||
+      lower.includes('yojana')
+    ) {
+      slots.purpose = 'SCHEME';
+    }
+
+    // 4. Detect Gender
+    if (
+      lower.includes('select male') ||
+      lower.includes('पुरुष') ||
+      lower.includes('gender male') ||
+      lower.includes('purush') ||
+      lower.includes('आदमी') ||
+      lower === 'male' ||
+      lower === 'पुरुष'
+    ) {
+      slots.gender = 'MALE';
+    } else if (
+      lower.includes('select female') ||
+      lower.includes('महिला') ||
+      lower.includes('gender female') ||
+      lower.includes('mahila') ||
+      lower.includes('औरत') ||
+      lower === 'female' ||
+      lower === 'महिला'
+    ) {
+      slots.gender = 'FEMALE';
+    }
+
+    // 5. Detect Uttarakhand District or State
     for (const district of SlotNormalizerService.UTTARAKHAND_DISTRICTS) {
       if (lower.includes(district.toLowerCase())) {
         slots.district = district;
@@ -54,7 +204,7 @@ export class SlotNormalizerService {
       else if (lower.includes('रुद्रप्रयाग') || lower.includes('rudraprayag')) slots.district = 'Rudraprayag';
       else if (lower.includes('चंपावत') || lower.includes('champawat')) slots.district = 'Champawat';
       else if (lower.includes('बागेश्वर') || lower.includes('bageshwar')) slots.district = 'Bageshwar';
-      else if (lower.includes('उधम सिंह') || lower.includes('udham singh')) slots.district = 'Udham Singh Nagar';
+      else if (lower.includes('उधम सिंह') || lower.includes('udham singh') || lower.includes('ऊधम सिंह') || lower.includes('रुद्रपुर')) slots.district = 'Udham Singh Nagar';
     }
 
     // State detection
@@ -63,92 +213,26 @@ export class SlotNormalizerService {
       slots.state = stateMatch[1].trim();
     }
 
-    // 3. Detect Applicant Name patterns
-    // e.g. "मेरा नाम कुलदीप सिंह नेगी है", "My name is Vimal", "Enter Vimal in the name field", "applicant name Vimal"
-    const enterNameMatch = lower.match(/(?:enter|type|put|write|likho|daalo|दर्ज करो)\s+([a-zA-Z\u0900-\u097F\s]+?)\s+(?:in|into|as|mein|के रूप में)?\s*(?:the\s+)?(?:name|applicant|naam|नाम)(?:\s+field|\s+mein|$)/i);
-    if (enterNameMatch && enterNameMatch[1]) {
-      slots.applicant_name = this.cleanName(enterNameMatch[1]);
-    } else {
-      const nameRegex = /(?:मेरा नाम|my name(?:\s+is)?|name(?:\s+is)?|applicant\s*name(?:\s+is)?|आवेदक का नाम|mera naam)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i;
-      const nameMatch = spokenText.match(nameRegex);
-      if (nameMatch && nameMatch[1]) {
-        const rawName = nameMatch[1].trim();
-        slots.applicant_name = this.cleanName(rawName);
-      } else if (activeFieldId === 'applicant_name' && !slots.annual_income && !slots.district) {
-        slots.applicant_name = this.cleanName(spokenText);
-      }
+    // 6. Detect Mobile Number
+    const phoneMatch = spokenText.match(/(?:मोबाइल|phone|mobile|number)?\s*([6-9]\d{9})/);
+    if (phoneMatch) {
+      slots.mobile_number = phoneMatch[1];
     }
 
-    // 4. Detect Father/Husband Name patterns
-    // e.g. "father name Indra Singh Bisht", "father's name Indra Singh Bisht", "पिता का नाम इन्द्र सिंह बिष्ट"
-    const fatherRegex = /(?:पिता(?: जी)? का नाम|father(?:'s|s)?\s*name(?:\s+is)?|father(?:\s+name)?|पति का नाम|pita(?:ji)?\s*ka\s*naam)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i;
-    const fatherMatch = spokenText.match(fatherRegex);
-    if (fatherMatch && fatherMatch[1]) {
-      const rawFather = fatherMatch[1].trim();
-      slots.father_husband_name = this.cleanName(rawFather);
-    } else if (activeFieldId === 'father_husband_name' && !slots.applicant_name && !slots.annual_income && !slots.district) {
-      slots.father_husband_name = this.cleanName(spokenText);
-    }
-
-    // 5. Detect Date of Birth (DOB)
-    // e.g. "My date of birth is 15 August 2005" or "15/08/2005"
+    // 7. Detect Date of Birth (DOB)
     const dobRegex = /(?:date of birth|dob|birth date|जन्म तिथि|janm tithi)(?:\s+is|\s+hai|\s*[:=])?\s*([0-9]{1,2}(?:st|nd|rd|th)?\s+[a-zA-Z\u0900-\u097F]+\s+[0-9]{4}|[0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{4})/i;
     const dobMatch = spokenText.match(dobRegex);
     if (dobMatch && dobMatch[1]) {
       slots.date_of_birth = dobMatch[1].trim();
     }
 
-    // 6. Detect Email Address
-    const emailMatch = spokenText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-    if (emailMatch) {
-      slots.email = emailMatch[1].trim();
-    }
-
-    // 7. Detect Gender
-    if (lower.includes('select male') || lower.includes('पुरुष') || lower.includes('gender male') || lower.includes('purush')) {
-      slots.gender = 'MALE';
-    } else if (lower.includes('select female') || lower.includes('महिला') || lower.includes('gender female') || lower.includes('mahila')) {
-      slots.gender = 'FEMALE';
-    }
-
-    // 8. Detect Tracking ID (UK-REV-XXXX-XXXX or 16-digit ID)
+    // 8. Detect Tracking ID
     const trackingMatch = spokenText.match(/UK-[A-Z0-9]+-[0-9]+-[0-9]+/i) || spokenText.match(/\b\d{16}\b/) || spokenText.match(/UK\d{2}[A-Z]{2}\d{12}/i);
     if (trackingMatch) {
       slots.tracking_id = trackingMatch[0].toUpperCase();
     }
 
-    // 9. Detect Mobile Number
-    const phoneMatch = spokenText.match(/(?:मोबाइल|phone|mobile|number)?\s*([6-9]\d{9})/);
-    if (phoneMatch) {
-      slots.mobile_number = phoneMatch[1];
-    }
-
-    // 10. Detect Income Source
-    if (lower.includes('private job') || lower.includes('private service') || lower.includes('salaried') || lower.includes('वेतनभोगी')) {
-      slots.income_source = 'SALARIED';
-    } else if (lower.includes('agriculture') || lower.includes('farming') || lower.includes('कृषि')) {
-      slots.income_source = 'AGRICULTURE';
-    } else if (lower.includes('labour') || lower.includes('मजदूरी') || lower.includes('दिहाड़ी')) {
-      slots.income_source = 'LABOUR';
-    } else if (lower.includes('business') || lower.includes('व्यापार') || lower.includes('दुकान')) {
-      slots.income_source = 'BUSINESS';
-    } else if (lower.includes('pension') || lower.includes('पेंशन')) {
-      slots.income_source = 'PENSION';
-    }
-
-    // 11. Detect Certificate Purpose
-    if (lower.includes('ration card') || lower.includes('राशन कार्ड')) {
-      slots.purpose = 'RATION_CARD';
-    } else if (lower.includes('scholarship') || lower.includes('छात्रवृत्ति')) {
-      slots.purpose = 'SCHOLARSHIP';
-    } else if (lower.includes('admission') || lower.includes('प्रवेश') || lower.includes('school') || lower.includes('college')) {
-      slots.purpose = 'ADMISSION';
-    } else if (lower.includes('scheme') || lower.includes('योजना')) {
-      slots.purpose = 'SCHEME';
-    }
-
-    // 12. Detect Aadhaar Number (12 digits, often spoken with spaces or dashes)
-    // DPDP Act 2023 Compliance: Mask the first 8 digits, store only masked representation & last 4 digits
+    // 9. Detect Aadhaar Number (12 digits, often spoken with spaces or dashes)
     const aadhaarMatch = spokenText.match(/(?:aadhaar|आधार|uid|adhar|uidai)?\s*([0-9]{4})[\s-]?([0-9]{4})[\s-]?([0-9]{4})/i);
     if (aadhaarMatch && aadhaarMatch[1] && aadhaarMatch[2] && aadhaarMatch[3]) {
       const lastFour = aadhaarMatch[3];
@@ -156,12 +240,50 @@ export class SlotNormalizerService {
       slots.aadhaar_number = `XXXX-XXXX-${lastFour}`;
     }
 
+    // 10. Detect Email Address
+    const emailMatch = spokenText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+    if (emailMatch) {
+      slots.email = emailMatch[1].trim();
+    }
+
+    // 11. Explicit Applicant Name patterns
+    // e.g. "मेरा नाम कुलदीप सिंह नेगी है", "My name is Vimal", "Enter Vimal in the name field", "applicant name Vimal"
+    const enterNameMatch = lower.match(/(?:enter|type|put|write|likho|daalo|दर्ज करो)\s+([a-zA-Z\u0900-\u097F\s]+?)\s+(?:in|into|as|mein|के रूप में)?\s*(?:the\s+)?(?:name|applicant|naam|नाम)(?:\s+field|\s+mein|$)/i);
+    if (enterNameMatch && enterNameMatch[1]) {
+      const candidate = this.cleanName(enterNameMatch[1]);
+      if (!SlotNormalizerService.isNonNameText(candidate)) {
+        slots.applicant_name = candidate;
+      }
+    } else {
+      const nameRegex = /(?:मेरा नाम|म्यरु नौ|म्यर नौ|मेरो नौ|my name(?:\s+is)?|name(?:\s+is)?|applicant\s*name(?:\s+is)?|आवेदक का नाम|mera naam)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|\s+बल|\s+bal|$)/i;
+      const nameMatch = spokenText.match(nameRegex);
+      if (nameMatch && nameMatch[1]) {
+        const rawName = nameMatch[1].trim();
+        const candidate = this.cleanName(rawName);
+        if (!SlotNormalizerService.isNonNameText(candidate)) {
+          slots.applicant_name = candidate;
+        }
+      }
+    }
+
+    // 12. Explicit Father/Husband Name patterns
+    const fatherRegex = /(?:पिता(?: जी)? का नाम|बौजी को नौ|बाबूजी को नौ|father(?:'s|s)?\s*name(?:\s+is)?|father(?:\s+name)?|पति का नाम|pita(?:ji)?\s*ka\s*naam)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|\s+बल|\s+bal|$)/i;
+    const fatherMatch = spokenText.match(fatherRegex);
+    if (fatherMatch && fatherMatch[1]) {
+      const rawFather = fatherMatch[1].trim();
+      const candidate = this.cleanName(rawFather);
+      if (!SlotNormalizerService.isNonNameText(candidate)) {
+        slots.father_husband_name = candidate;
+      }
+    }
+
     // 13. Detect Head of Family Name (Pariwar Register)
     const headMatch = spokenText.match(/(?:head of family|मुखिया का नाम|family head|मुखिया)\s*[:=\-]?\s*([a-zA-Z\u0900-\u097F\s]+?)(?:\s+है|\s+hai|\s*,|\s+और|\s+and|$)/i);
     if (headMatch && headMatch[1]) {
-      slots.head_of_family_name = this.cleanName(headMatch[1]);
-    } else if (activeFieldId === 'head_of_family_name') {
-      slots.head_of_family_name = this.cleanName(spokenText);
+      const candidate = this.cleanName(headMatch[1]);
+      if (!SlotNormalizerService.isNonNameText(candidate)) {
+        slots.head_of_family_name = candidate;
+      }
     }
 
     // 14. Detect Development Block & Gram Panchayat
@@ -174,13 +296,29 @@ export class SlotNormalizerService {
       slots.gram_panchayat = this.cleanName(panchayatMatch[1]);
     }
 
+    // 15. SAFE ACTIVE-FIELD FALLBACK (Runs ONLY if no other slot was matched and text is genuinely a name)
+    if (Object.keys(slots).length === 0 && !SlotNormalizerService.isNonNameText(spokenText)) {
+      const wordCount = spokenText.trim().split(/\s+/).length;
+      const hasDigits = /\d/.test(spokenText);
+
+      if (wordCount <= 4 && !hasDigits) {
+        if (activeFieldId === 'applicant_name') {
+          slots.applicant_name = this.cleanName(spokenText);
+        } else if (activeFieldId === 'father_husband_name') {
+          slots.father_husband_name = this.cleanName(spokenText);
+        } else if (activeFieldId === 'head_of_family_name') {
+          slots.head_of_family_name = this.cleanName(spokenText);
+        }
+      }
+    }
+
     return slots;
   }
 
   private cleanName(name: string): string {
     return name
       .replace(/^(श्री|श्रीमती|shri|mr|mrs|dr)\s+/i, '')
-      .replace(/(?:है|hai|था|tha|ji|जी)$/i, '')
+      .replace(/(?:है|hai|था|tha|ji|जी|बल|bal)$/i, '')
       .replace(/\s+/g, ' ')
       .trim();
   }

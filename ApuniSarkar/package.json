@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "vite",
-    "dev:server": "tsx server/src/index.ts",
+    "dev:server": "tsx watch server/src/index.ts",
     "test": "tsx server/src/test/verifyEndToEnd.ts",
     "verify": "tsx server/src/test/verifyEndToEnd.ts",
     "build:client": "vite build",

@@ -175,11 +175,12 @@ export class FormInteractionEngine {
     const aliasMap: Record<string, string[]> = {
       applicant_name: [
         'applicant name', 'full name', 'citizen name', 'your name', 'name',
-        'नाम', 'आवेदक का नाम', 'पूरा नाम', 'आवेदक का पूरा नाम', 'naam', 'applicant_name'
+        'नाम', 'आवेदक का नाम', 'पूरा नाम', 'आवेदक का पूरा नाम', 'naam', 'applicant_name', 'myaaru nau', 'myero nau'
       ],
       father_husband_name: [
         'father name', 'father husband name', 'husband name', "father's name", 'father',
-        'पिता का नाम', 'पिता अथवा पति का नाम', 'पति का नाम', 'पिता', 'पति', 'pita ka naam', 'pita', 'pitaji', 'father_husband_name'
+        'पिता का नाम', 'पिता अथवा पति का नाम', 'पति का नाम', 'पिताजी का नाम', 'पिताजी', 'पिता', 'पति', 'बाबूजी', 'बौजी',
+        'pita ka naam', 'pita', 'pitaji', 'bauji', 'father_husband_name'
       ],
       mobile_number: [
         'mobile number', 'phone number', 'contact number', 'mobile', 'phone',
@@ -188,15 +189,19 @@ export class FormInteractionEngine {
       annual_income: [
         'total annual income', 'total annual family income', 'annual family income', 'annual income', 'total income',
         'yearly income', 'salary', 'household income', 'income',
-        'कुल वार्षिक आय', 'वार्षिक आय', 'पारिवारिक आय', 'आय', 'कमाई', 'आमदनी', 'annual_income'
+        'कुल वार्षिक आय', 'वार्षिक आय', 'पारिवारिक आय', 'सालाना आय', 'आय', 'कमाई', 'आमदनी', 'पईसा', 'annual_income'
       ],
       income_source: [
-        'primary income source', 'income source', 'source of income', 'income type',
-        'आय का मुख्य साधन', 'आय का साधन', 'कमाई का साधन', 'income_source'
+        'primary income source', 'primary income', 'income source', 'source of income', 'income type',
+        'primary source', 'occupation', 'profession', 'job type', 'work',
+        'आय का मुख्य साधन', 'आय का साधन', 'कमाई का साधन', 'आय का स्रोत', 'मुख्य साधन', 'कमाई का जरिया',
+        'प्राइमरी इनकम सोर्स', 'प्राइमरी इनकम', 'इनकम सोर्स', 'इनकम टाइप', 'रोजगार', 'पेशा', 'व्यवसाय',
+        'aay ka mukhya sadhan', 'aay ka sadhan', 'kamai ka sadhan', 'income_source'
       ],
       purpose: [
-        'certificate required for', 'purpose', 'required for', 'certificate purpose',
-        'प्रमाण पत्र का प्रयोजन', 'प्रयोजन', 'हेतु', 'purpose'
+        'certificate required for', 'purpose', 'required for', 'certificate purpose', 'reason',
+        'प्रमाण पत्र का प्रयोजन', 'प्रमाण पत्र का उद्देश्य', 'प्रयोजन', 'हेतु', 'उद्देश्य', 'किसलिए चाहिए',
+        'pramaan patra ka prayojan', 'prayojan', 'purpose'
       ],
       date_of_birth: [
         'date of birth', 'birth date', 'birthday', 'dob',
@@ -214,10 +219,10 @@ export class FormInteractionEngine {
       ],
       patwari_circle: [
         'patwari circle', 'patwari lekhpal circle', 'lekhpal circle', 'patwari', 'lekhpal',
-        'पटवारी', 'लेखपाल चौकी', 'patwari_circle'
+        'पटवारी', 'लेखपाल चौकी', 'पटवारी चौकी', 'patwari_circle'
       ],
       village_ward: [
-        'village ward', 'village', 'ward', 'गाँव', 'गांव', 'वार्ड', 'gram panchayat', 'gram'
+        'village ward', 'village', 'ward', 'गाँव', 'गांव', 'वार्ड', 'gram panchayat', 'gram', 'ग्राम'
       ],
       email: [
         'email address', 'email', 'mail', 'ईमेल', 'ईमेल पता', 'email'
@@ -307,18 +312,55 @@ export class FormInteractionEngine {
         matchedIndex = select.options.length > 3 ? 3 : 2;
       } else {
         const synonyms: Record<string, string[]> = {
-          'SALARIED': ['private job', 'job', 'private service', 'service', 'salaried', 'वेतनभोगी', 'नौकरी', 'प्राइवेट नौकरी', 'प्राइवेट'],
-          'AGRICULTURE': ['agriculture', 'farming', 'kheti', 'कृषि', 'बागवानी', 'किसान'],
-          'LABOUR': ['labour', 'daily labour', 'majdoor', 'मजदूरी', 'दिहाड़ी'],
-          'BUSINESS': ['business', 'shop', 'vyapar', 'व्यापार', 'दुकान'],
-          'PENSION': ['pension', 'pensioner', 'पेंशन'],
-          'SCHOLARSHIP': ['scholarship', 'chhatravritti', 'छात्रवृत्ति', 'stipend'],
-          'RATION_CARD': ['ration card', 'ration', 'राशन कार्ड', 'राशन'],
-          'ADMISSION': ['admission', 'school', 'college', 'shiksha', 'शिक्षा', 'दाखिला', 'प्रवेश'],
-          'SCHEME': ['scheme', 'yojana', 'welfare', 'योजना', 'सरकारी योजना'],
-          'MALE': ['male', 'purush', 'पुरुष', 'आदमी', 'boy', 'man'],
-          'FEMALE': ['female', 'mahila', 'महिला', 'औरत', 'girl', 'woman'],
-          'OTHER': ['other', 'anya', 'अन्य'],
+          'SALARIED': [
+            'private job', 'job', 'private service', 'service', 'salaried',
+            'वेतनभोगी', 'नौकरी', 'प्राइवेट नौकरी', 'प्राइवेट जॉब', 'प्राइवेट सर्विस', 'प्राइवेट',
+            'नौकरीपेशा', 'कंपनी जॉब', 'सर्विस'
+          ],
+          'AGRICULTURE': [
+            'agriculture', 'farming', 'farmer', 'kheti', 'kisan',
+            'कृषि', 'बागवानी', 'किसान', 'खेती', 'काश्तकार', 'कृषक'
+          ],
+          'LABOUR': [
+            'labour', 'daily labour', 'majdoor', 'majdoori', 'worker',
+            'मजदूरी', 'दिहाड़ी', 'मजदूर', 'दैनिक मजदूरी', 'श्रमिक', 'श्रम'
+          ],
+          'BUSINESS': [
+            'business', 'shop', 'shopkeeper', 'vyapar', 'dukan',
+            'व्यापार', 'दुकान', 'व्यवसाय', 'दुकानदार', 'कारोबार', 'स्वरोजगार'
+          ],
+          'PENSION': [
+            'pension', 'pensioner', 'retire', 'retired',
+            'पेंशन', 'पेंशनर', 'सेवानिवृत्त'
+          ],
+          'SCHOLARSHIP': [
+            'scholarship', 'chhatravritti', 'stipend',
+            'छात्रवृत्ति', 'वजीफा', 'स्कॉलरशिप'
+          ],
+          'RATION_CARD': [
+            'ration card', 'ration', 'food security',
+            'राशन कार्ड', 'राशन', 'खाद्य सुरक्षा'
+          ],
+          'ADMISSION': [
+            'admission', 'school', 'college', 'shiksha', 'university', 'study',
+            'शिक्षा', 'दाखिला', 'प्रवेश', 'स्कूल', 'कॉलेज', 'यूनिवर्सिटी'
+          ],
+          'SCHEME': [
+            'scheme', 'yojana', 'welfare', 'govt scheme',
+            'योजना', 'सरकारी योजना', 'कल्याणकारी योजना'
+          ],
+          'MALE': [
+            'male', 'purush', 'man', 'boy',
+            'पुरुष', 'आदमी', 'लड़का'
+          ],
+          'FEMALE': [
+            'female', 'mahila', 'woman', 'girl',
+            'महिला', 'औरत', 'लड़की', 'स्त्री'
+          ],
+          'OTHER': [
+            'other', 'anya', 'transgender',
+            'अन्य', 'किन्नर'
+          ],
           'EMPLOYMENT': ['employment', 'job', 'service', 'नौकरी', 'रोजगार'],
           'EDUCATION': ['education', 'study', 'padhai', 'शिक्षा', 'पढ़ाई'],
           'LAND': ['land', 'bhumi', 'jamin', 'भूमि', 'जमीन'],
@@ -705,6 +747,12 @@ export class FormInteractionEngine {
       return directResult;
     }
 
+    // 5b. Standalone Option / Value matching (e.g. citizen just says "private job", "प्राइवेट जॉब", "राशन कार्ड", "male", "female")
+    const optionResult = FormInteractionEngine.matchStandaloneOption(t, fields);
+    if (optionResult) {
+      return optionResult;
+    }
+
     // 6. Submit Form Request
     if (lower.includes('submit form') || lower.includes('जमा करो') || lower.includes('submit application') || lower.includes('form submit')) {
       const summary = FormInteractionEngine.summarizeForm(fields);
@@ -732,14 +780,24 @@ export class FormInteractionEngine {
     const t = transcript.trim();
     const lower = t.toLowerCase();
 
+    // Support stripping leading conversational filler prefixes: "my primary income source is...", "mera naam..."
+    let cleanLower = lower;
+    let cleanRaw = t;
+    const fillerPrefixMatch = lower.match(/^(?:my|mera|meri|the|hamara|aapka|apna|apni|ye|yeh)\s+/i);
+    if (fillerPrefixMatch) {
+      cleanLower = lower.slice(fillerPrefixMatch[0].length).trim();
+      cleanRaw = t.slice(fillerPrefixMatch[0].length).trim();
+    }
+
     const aliasMap: Record<string, string[]> = {
       applicant_name: [
         'applicant name', 'full name', 'citizen name', 'your name', 'name',
-        'नाम', 'आवेदक का नाम', 'पूरा नाम', 'आवेदक का पूरा नाम', 'naam', 'applicant_name'
+        'नाम', 'आवेदक का नाम', 'पूरा नाम', 'आवेदक का पूरा नाम', 'naam', 'applicant_name', 'myaaru nau', 'myero nau'
       ],
       father_husband_name: [
         'father name', 'father husband name', 'husband name', "father's name", 'father',
-        'पिता का नाम', 'पिता अथवा पति का नाम', 'पति का नाम', 'पिता', 'पति', 'pita ka naam', 'pita', 'pitaji', 'father_husband_name'
+        'पिता का नाम', 'पिता अथवा पति का नाम', 'पति का नाम', 'पिताजी का नाम', 'पिताजी', 'पिता', 'पति', 'बाबूजी', 'बौजी',
+        'pita ka naam', 'pita', 'pitaji', 'bauji', 'father_husband_name'
       ],
       mobile_number: [
         'mobile number', 'phone number', 'contact number', 'mobile', 'phone',
@@ -748,15 +806,19 @@ export class FormInteractionEngine {
       annual_income: [
         'total annual income', 'total annual family income', 'annual family income', 'annual income', 'total income',
         'yearly income', 'salary', 'household income', 'income',
-        'कुल वार्षिक आय', 'वार्षिक आय', 'पारिवारिक आय', 'आय', 'कमाई', 'आमदनी', 'annual_income'
+        'कुल वार्षिक आय', 'वार्षिक आय', 'पारिवारिक आय', 'सालाना आय', 'आय', 'कमाई', 'आमदनी', 'पईसा', 'annual_income'
       ],
       income_source: [
-        'primary income source', 'income source', 'source of income', 'income type',
-        'आय का मुख्य साधन', 'आय का साधन', 'कमाई का साधन', 'income_source'
+        'primary income source', 'primary income', 'income source', 'source of income', 'income type',
+        'primary source', 'occupation', 'profession', 'job type', 'work',
+        'आय का मुख्य साधन', 'आय का साधन', 'कमाई का साधन', 'आय का स्रोत', 'मुख्य साधन', 'कमाई का जरिया',
+        'प्राइमरी इनकम सोर्स', 'प्राइमरी इनकम', 'इनकम सोर्स', 'इनकम टाइप', 'रोजगार', 'पेशा', 'व्यवसाय',
+        'aay ka mukhya sadhan', 'aay ka sadhan', 'kamai ka sadhan', 'income_source'
       ],
       purpose: [
-        'certificate required for', 'purpose', 'required for', 'certificate purpose',
-        'प्रमाण पत्र का प्रयोजन', 'प्रयोजन', 'हेतु', 'purpose'
+        'certificate required for', 'purpose', 'required for', 'certificate purpose', 'reason',
+        'प्रमाण पत्र का प्रयोजन', 'प्रमाण पत्र का उद्देश्य', 'प्रयोजन', 'हेतु', 'उद्देश्य', 'किसलिए चाहिए',
+        'pramaan patra ka prayojan', 'prayojan', 'purpose'
       ],
       date_of_birth: [
         'date of birth', 'birth date', 'birthday', 'dob',
@@ -774,10 +836,10 @@ export class FormInteractionEngine {
       ],
       patwari_circle: [
         'patwari circle', 'patwari lekhpal circle', 'lekhpal circle', 'patwari', 'lekhpal',
-        'पटवारी', 'लेखपाल चौकी', 'patwari_circle'
+        'पटवारी', 'लेखपाल चौकी', 'पटवारी चौकी', 'patwari_circle'
       ],
       village_ward: [
-        'village ward', 'village', 'ward', 'गाँव', 'गांव', 'वार्ड', 'gram panchayat', 'gram'
+        'village ward', 'village', 'ward', 'गाँव', 'गांव', 'वार्ड', 'gram panchayat', 'gram', 'ग्राम'
       ],
       email: [
         'email address', 'email', 'mail', 'ईमेल', 'ईमेल पता', 'email'
@@ -821,10 +883,16 @@ export class FormInteractionEngine {
 
     // 1. Direct prefix match: "father name Indra Singh Bisht", "total annual income 2 crore"
     for (const cand of candidates) {
-      if (lower.startsWith(cand.key)) {
-        const nextChar = lower[cand.key.length];
+      const matchedPrefix = lower.startsWith(cand.key)
+        ? { text: t, lowerText: lower }
+        : cleanLower.startsWith(cand.key)
+        ? { text: cleanRaw, lowerText: cleanLower }
+        : null;
+
+      if (matchedPrefix) {
+        const nextChar = matchedPrefix.lowerText[cand.key.length];
         if (!nextChar || /\s|[:=\-–,]/.test(nextChar)) {
-          let remainder = t.slice(cand.key.length).trim();
+          let remainder = matchedPrefix.text.slice(cand.key.length).trim();
           remainder = remainder
             .replace(/^[:=\-–,]\s*/, '')
             .replace(/^(is|are|hai|hain|ko|mein|set to|bharo|likho|दर्ज करो|रखो|हो)\s+/i, '')
@@ -916,6 +984,41 @@ export class FormInteractionEngine {
               : `${match.field.label || 'Field'} mein "${valToSet}" enter kar diya hai.`,
           };
         }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Matches when a citizen directly utters an option value without repeating the field name
+   * e.g. "private job", "प्राइवेट जॉब", "वेतनभोगी", "राशन कार्ड", "male", "पुरुष", "देहरादून"
+   */
+  public static matchStandaloneOption(transcript: string, fields: DiscoveredField[]): FormActionResult | null {
+    const t = transcript.trim();
+    if (!t || t.length < 2) return null;
+    const lower = t.toLowerCase();
+
+    // Do not match long sentences or questions
+    if (lower.split(/\s+/).length > 5) return null;
+
+    const selectFields = fields.filter((f) => f.type === 'select' && f.element);
+
+    for (const f of selectFields) {
+      const ok = FormInteractionEngine.setFieldValue(f.element, t);
+      if (ok) {
+        const canonicalValue = (f.element as any)._resolvedValue ?? t;
+        const displayLabel = (f.element as any)._resolvedLabel ?? t;
+
+        return {
+          status: 'SUCCESS',
+          fieldId: f.id,
+          fieldName: f.label || f.name,
+          updatedValue: canonicalValue,
+          messageEn: `Selected "${displayLabel}" for ${f.label || f.name}.`,
+          messageHi: `${f.label || 'फ़ील्ड'} के लिए "${displayLabel}" चुना गया।`,
+          messageHinglish: `${f.label || 'Field'} ke liye "${displayLabel}" select kar diya.`,
+        };
       }
     }
 

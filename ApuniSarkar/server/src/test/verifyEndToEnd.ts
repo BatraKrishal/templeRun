@@ -356,12 +356,36 @@ async function runEndToEndVerification() {
     });
     const data: any = await res.json();
     assert(
-      data.intent === 'FILL_FIELD' && data.extractedSlots?.income_source === 'SALARIED',
-      'Select dropdown synonym "primary income source private job" maps to enum SALARIED',
+      data.intent === 'FILL_FIELD' &&
+      data.extractedSlots?.income_source === 'SALARIED' &&
+      !data.extractedSlots?.applicant_name,
+      'Select dropdown synonym "primary income source private job" maps to enum SALARIED without polluting name',
       data
     );
   } catch (err: any) {
     assert(false, 'Income source dropdown synonym test failed', err.message);
+  }
+
+  // 15e2. Hindi Devanagari Select Matching: "आय का मुख्य साधन प्राइवेट जॉब" -> SALARIED
+  try {
+    const res = await fetch('http://localhost:5000/api/voice/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: 'आय का मुख्य साधन प्राइवेट जॉब',
+        currentRoute: '/services/revenue/income-certificate',
+      }),
+    });
+    const data: any = await res.json();
+    assert(
+      data.intent === 'FILL_FIELD' &&
+      data.extractedSlots?.income_source === 'SALARIED' &&
+      !data.extractedSlots?.applicant_name,
+      'Hindi Devanagari "आय का मुख्य साधन प्राइवेट जॉब" maps to enum SALARIED without polluting name',
+      data
+    );
+  } catch (err: any) {
+    assert(false, 'Hindi income source dropdown test failed', err.message);
   }
 
   // 15f. Select Dropdown Matching: "certificate required for ration card" -> RATION_CARD
